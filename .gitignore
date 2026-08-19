@@ -1,0 +1,15 @@
+# کلید امضا — هرگز کامیت نشود
+app/keys/
+*.jks
+*.keystore
+
+# خروجی بیلد
+app/work/
+*.apk
+*.ap_
+
+# ابزار و فایل‌های سیستم
+.tools/
+__pycache__/
+*.pyc
+.DS_Store

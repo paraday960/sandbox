@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>سندباکس ۲</title>
+<style>
+  :root{
+    --bg:#0b1220; --card:#121a2b; --card2:#0f1626; --border:#1f2a44;
+    --text:#e2e8f0; --muted:#8b9cc0; --cyan:#22d3ee; --violet:#818cf8;
+    --ok:#34d399; --warn:#fbbf24; --err:#f87171;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  html,body{margin:0; padding:0; background:var(--bg); color:var(--text);
+    font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif; font-size:15px;}
+  header{
+    position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:12px;
+    padding:13px 16px 11px; background:linear-gradient(135deg,#0e1a33,#0b1220 70%);
+    border-bottom:1px solid var(--border);
+  }
+  .logo{width:42px; height:42px; flex:0 0 42px; border-radius:12px; display:flex;
+    align-items:center; justify-content:center; background:linear-gradient(135deg,var(--cyan),var(--violet));
+    box-shadow:0 4px 18px rgba(34,211,238,.35);}
+  header h1{margin:0; font-size:19px;}
+  header p{margin:2px 0 0; font-size:11.5px; color:var(--muted);}
+  main{padding:14px 14px calc(88px + env(safe-area-inset-bottom));}
+  section{display:none;}
+  section.active{display:block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:14px; margin-bottom:12px;}
+  .card h3{margin:0 0 10px; font-size:14px; color:var(--muted); font-weight:600;}
+  .big{font-size:23px; font-weight:700; margin-bottom:2px;}
+  .sub{font-size:12px; color:var(--muted);}
+  .bar{height:8px; border-radius:99px; background:#1a2440; margin-top:10px; overflow:hidden;}
+  .bar>i{display:block; height:100%; border-radius:99px; width:0%;
+    background:linear-gradient(90deg,var(--cyan),var(--violet)); transition:width .3s;}
+  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
+  .row>.card{flex:1 1 150px;}
+  button{border:none; border-radius:12px; padding:11px 16px; font-size:14px; font-weight:600;
+    font-family:inherit; cursor:pointer; color:#06121f; background:linear-gradient(135deg,var(--cyan),var(--violet));
+    box-shadow:0 3px 14px rgba(34,211,238,.25);}
+  button.ghost{background:var(--card2); color:var(--text); border:1px solid var(--border); box-shadow:none;}
+  button.danger{background:transparent; border:1px solid #3b2030; color:var(--err); box-shadow:none;}
+  button.small{padding:8px 12px; font-size:13px; border-radius:10px;}
+  button:disabled{opacity:.45;}
+  input[type=number], input[type=text]{
+    background:var(--card2); border:1px solid var(--border); color:var(--text);
+    border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; width:110px;}
+  input[type=text]{width:100%;}
+  nav{position:fixed; bottom:0; left:0; right:0; display:flex; z-index:5;
+    background:rgba(11,18,32,.94); backdrop-filter:blur(10px); border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom);}
+  nav button{flex:1; background:none; box-shadow:none; color:var(--muted); border-radius:0;
+    padding:9px 2px 11px; font-size:11.5px; display:flex; flex-direction:column; gap:4px; align-items:center;}
+  nav button .ic{font-size:19px;}
+  nav button.active{color:var(--cyan);}
+  .note{background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(129,140,248,.08));
+    border:1px solid rgba(34,211,238,.25);}
+  textarea{width:100%; background:var(--card2); color:#d7e3f4; border:1px solid var(--border);
+    border-radius:12px; padding:12px; font-size:13px; font-family:ui-monospace,Consolas,monospace;
+    direction:ltr; text-align:left; resize:vertical;}
+  #pyEditor{min-height:180px; line-height:1.6;}
+  pre{margin:0; white-space:pre-wrap; word-break:break-word;}
+  #termOut{background:#0a101c; border:1px solid var(--border); border-radius:12px;
+    padding:12px; min-height:230px; max-height:46vh; overflow:auto;
+    direction:ltr; text-align:left; font-size:12.5px; font-family:ui-monospace,Consolas,monospace;
+    line-height:1.5;}
+  .t-p{color:var(--cyan);}
+  .t-in{color:var(--warn);}
+  .t-err{color:var(--err);}
+  .t-sys{color:var(--muted);}
+  .termrow{display:flex; gap:8px; margin-top:10px;}
+  #termIn{flex:1; direction:ltr; text-align:left; font-family:ui-monospace,Consolas,monospace;}
+  .chip{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:99px;
+    font-size:12px; border:1px solid var(--border); background:var(--card2); margin:0 0 8px 6px;}
+  .chip b{font-weight:600;}
+  .chip.on{border-color:rgba(52,211,153,.5);} .chip.on b{color:var(--ok);}
+  .chip.off b{color:var(--muted);}
+  .doc{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border);
+    border-radius:14px; padding:12px; margin-bottom:9px;}
+  .doc .nm{font-weight:600; word-break:break-all;}
+  .doc .mt{font-size:11px; color:var(--muted); margin-top:3px;}
+  .doc .grow{flex:1; min-width:0;}
+  .doc .ic{font-size:22px;}
+  .empty{text-align:center; color:var(--muted); padding:26px 8px; font-size:13px;}
+  .modal{position:fixed; inset:0; z-index:9; background:rgba(4,8,16,.7); display:none;
+    align-items:flex-end; justify-content:center;}
+  .modal.open{display:flex;}
+  .sheet{background:var(--card); border:1px solid var(--border); border-radius:20px 20px 0 0;
+    width:100%; max-width:640px; padding:16px 16px calc(18px + env(safe-area-inset-bottom));
+    max-height:88vh; overflow:auto;}
+  .sheet h3{margin:0 0 12px;}
+  .lbl{font-size:12px; color:var(--muted); margin:10px 0 6px;}
+  #toast{position:fixed; bottom:84px; left:50%; transform:translateX(-50%); z-index:20;
+    background:#1c2742; color:var(--text); border:1px solid var(--border); padding:9px 18px;
+    border-radius:99px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none;
+    max-width:88%; text-align:center;}
+  #toast.show{opacity:1;}
+  .kv{background:var(--card2); border:1px dashed var(--border); border-radius:12px; padding:10px 12px;
+    font-size:12.5px; direction:ltr; text-align:left; word-break:break-all; margin:8px 0;}
+  .progwrap{display:none; margin-top:10px;}
+  .progwrap.show{display:block;}
+  .held{font-size:12px; color:var(--warn); margin-top:8px;}
+  .mono{font-family:ui-monospace,Consolas,monospace; direction:ltr; unicode-bidi:embed;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2 3 7v10l9 5 9-5V7l-9-5z" stroke="#06121f" stroke-width="1.6" fill="rgba(6,18,31,.35)"/>
+      <path d="M3 7l9 5 9-5M12 12v10" stroke="#06121f" stroke-width="1.6"/>
+    </svg>
+  </div>
+  <div>
+    <h1>سندباکس ۲</h1>
+    <p id="subtitle">گوشیِ تو، سرورِ تو — لینوکس + پایتون + تونل</p>
+  </div>
+</header>
+
+<main>
+
+  <!-- ============ داشبورد ============ -->
+  <section id="tab-dash" class="active">
+    <div class="card">
+      <h3>وضعیت توانایی‌ها</h3>
+      <div>
+        <span class="chip off" id="chip-linux">🐧 <b>لینوکس: ؟</b></span>
+        <span class="chip off" id="chip-python">🐍 <b>پایتون: ؟</b></span>
+        <span class="chip off" id="chip-tunnel">🌉 <b>تونل: ؟</b></span>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="small" id="btnLinux" onclick="Android?Android.installLinux():0">🐧 نصب لینوکس (~۳۰MB)</button>
+        <button class="small ghost" id="btnPkgs" onclick="Android?Android.installPkgs():0">🐍 پایتون + تونل (~۱۷MB)</button>
+      </div>
+      <div class="progwrap" id="progWrap">
+        <div class="bar" style="margin-top:4px"><i id="progBar"></i></div>
+        <div class="sub" id="progMsg" style="margin-top:6px">…</div>
+      </div>
+      <div class="sub" style="margin-top:8px">هر دو نصب فقط یک‌بار انجام می‌شه؛ بعدش همه‌چیز آفلاین در دسترسه.</div>
+    </div>
+
+    <div class="row">
+      <div class="card">
+        <h3>حافظه رم (RAM)</h3>
+        <div class="big" id="ramAvail">—</div>
+        <div class="sub" id="ramSub">در دسترس از —</div>
+        <div class="bar"><i id="ramBar"></i></div>
+      </div>
+      <div class="card">
+        <h3>حافظه گوشی</h3>
+        <div class="big" id="romFree">—</div>
+        <div class="sub" id="romSub">آزاد از —</div>
+        <div class="bar"><i id="romBar"></i></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>باکس اسناد</h3>
+      <div class="big" id="boxSize">—</div>
+      <div class="sub" id="boxSub">—</div>
+    </div>
+
+    <div class="card">
+      <h3>🧪 آزمون رم</h3>
+      <div class="row">
+        <input type="number" id="memMB" value="128" min="1" max="4096">
+        <span class="sub">مگابایت</span>
+        <button class="small" onclick="holdMem()">تخصیص بده</button>
+        <button class="small ghost" onclick="freeMem()">آزادسازی</button>
+      </div>
+      <div class="held" id="heldInfo">هیچ حافظه‌ای نگه داشته نشده.</div>
+    </div>
+  </section>
+
+  <!-- ============ ترمینال ============ -->
+  <section id="tab-term">
+    <div class="card">
+      <h3>🐧 ترمینال لینوکس — بش واقعی روی گوشی</h3>
+      <pre id="termOut"><span class="t-sys">محیط لینوکس آماده بشه، اینجا ترمینال فعاله.
+اول از داشبورد «نصب لینوکس» رو بزن. 🚀</span></pre>
+      <div class="termrow">
+        <input type="text" id="termIn" placeholder="یک دستور… (مثل ls -la)" autocomplete="off">
+        <button class="small" id="termRun" onclick="termRun()">▶</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="small ghost" onclick="quickCmd('ls -la')">ls -la</button>
+        <button class="small ghost" onclick="quickCmd('df -h')">df -h</button>
+        <button class="small ghost" onclick="quickCmd('uname -a')">uname -a</button>
+        <button class="small ghost" onclick="quickCmd('echo سلام دنیا')">سلام</button>
+        <button class="small ghost" onclick="termClear()">پاک کردن</button>
+      </div>
+      <div class="sub" style="margin-top:8px">دستورها با بشِ واقعی اجرا می‌شن: <span class="mono">ls • grep • sed • curl • tar • df • cat • …</span> — و بعد از نصب پایتون، <span class="mono">python3</span> هم همین‌جاست.</div>
+    </div>
+  </section>
+
+  <!-- ============ پایتون ============ -->
+  <section id="tab-py">
+    <div class="card">
+      <h3>🐍 پایتون — اجرا روی پردازنده‌ی گوشی</h3>
+      <textarea id="pyEditor" spellcheck="false" placeholder="# کد پایتون…"></textarea>
+      <div class="row" style="margin-top:10px">
+        <button class="small" id="pyRunBtn" onclick="pyRun()">▶ اجرا</button>
+        <button class="small ghost" onclick="pySaveDoc()">ذخیره در اسناد</button>
+        <button class="small ghost" onclick="pyClear()">پاک کردن خروجی</button>
+      </div>
+      <div class="sub" style="margin-top:8px">نصب کتابخانه: <span class="mono">python3 -m pip install نام‌کتابخانه</span> از تب ترمینال.</div>
+    </div>
+    <div class="card">
+      <h3>خروجی</h3>
+      <pre id="pyOut" class="t-sys">بعد از اجرا، نتیجه اینجاست…</pre>
+    </div>
+  </section>
+
+  <!-- ============ بسته‌ها ============ -->
+  <section id="tab-pkg">
+    <div class="card note">
+      <b>📦 مدیر بسته — معادل apt ایجنت</b>
+      <div class="sub" style="margin-top:6px;">هر بسته‌ای از مخزن (ده‌ها‌هزار بسته: nodejs، git، ffmpeg، clang، …) با همه‌ی وابستگی‌هاش روی گوشی نصب می‌شه. بعد از نصب، توی ترمینال در دسترسه.</div>
+    </div>
+    <div class="card">
+      <h3>نصب سریع</h3>
+      <div class="row" id="quickPkgs"></div>
+      <div class="sub" style="margin-top:8px">یا نصب چندتایی با فاصله: <span class="mono">nano jq</span></div>
+      <div class="termrow" style="margin-top:8px">
+        <input type="text" id="pkgCustom" dir="ltr" placeholder="نام بسته… مثلاً nodejs">
+        <button class="small" onclick="pkgInstallCustom()">نصب</button>
+      </div>
+    </div>
+    <div class="card">
+      <h3>🔍 جستجو در مخزن</h3>
+      <div class="termrow">
+        <input type="text" id="pkgSearchIn" placeholder="مثلاً image یا webserver…">
+        <button class="small" onclick="pkgDoSearch()">جستجو</button>
+      </div>
+      <div id="pkgResults" style="margin-top:10px"></div>
+    </div>
+    <div class="card">
+      <h3>وضعیت نصب</h3>
+      <div class="progwrap" id="pkgProgWrap">
+        <div class="bar" style="margin-top:4px"><i id="pkgProgBar"></i></div>
+        <div class="sub" id="pkgProgMsg" style="margin-top:6px">…</div>
+      </div>
+      <div class="sub" id="pkgJobState">فعالیتی در جریان نیست.</div>
+      <h3 style="margin-top:14px">نصب‌شده‌ها</h3>
+      <div id="pkgInstalledList"></div>
+    </div>
+  </section>
+
+  <!-- ============ اسناد ============ -->
+  <section id="tab-docs">
+    <div class="card">
+      <div class="row">
+        <button class="small" onclick="newDoc()">＋ سند جدید</button>
+        <button class="small ghost" onclick="Android?Android.importDoc():0">⬆ واردکردن فایل</button>
+        <span class="sub" id="docsStat" style="flex:1; text-align:left"></span>
+      </div>
+    </div>
+    <div id="docList"></div>
+  </section>
+
+  <!-- ============ اتصال ============ -->
+  <section id="tab-link">
+    <div class="card note">
+      <b>🌉 پل اتصال به ایجنت</b>
+      <div class="sub" style="margin-top:6px;">تونل رایگان کلادفلر گوشی رو به یه آدرس اینترنتی تبدیل می‌کنه؛ آدرس + توکن رو بفرستی، ایجنت از اون‌طرف وصل می‌شه: اجرای کد، شل و جابه‌جایی فایل — با رم و حافظه‌ی خودِ گوشی.</div>
+    </div>
+    <div class="card">
+      <div class="row">
+        <button class="small" onclick="linkStart()">🔌 شروع تونل</button>
+        <button class="small danger" onclick="Android?Android.tunnelStop():0">توقف</button>
+      </div>
+      <div class="sub" id="tunnelMsg" style="margin-top:10px">تونل خاموشه.</div>
+    </div>
+    <div class="card" id="linkInfo" style="display:none">
+      <h3>این دو خط را عیناً برای ایجنت بفرست</h3>
+      <div class="kv" id="kvUrl">—</div>
+      <div class="kv" id="kvToken">—</div>
+      <button class="small" onclick="copyLinkInfo()">📋 کپی هر دو خط</button>
+    </div>
+    <div class="card">
+      <h3>🛡 پروکسی — برای شبکه‌های فیلترشده (اختیاری)</h3>
+      <div class="termrow">
+        <input type="text" id="proxyIn" dir="ltr" placeholder="مثلاً socks5://127.0.0.1:1080 یا http://host:port">
+        <button class="small" onclick="saveProxy()">ذخیره</button>
+      </div>
+      <div class="sub" style="margin-top:8px">اگر VPN یا پروکسی داری، آدرسش را اینجا بگذار تا همه‌ی دستورهای ترمینال (curl، pip، git و…) از آن مسیر بروند. خالی = خاموش. خودِ تونل از پروکسی عبور نمی‌کند.</div>
+    </div>
+    <div class="card">
+      <h3>📌 برای اتصال پایدار</h3>
+      <ul class="sub" style="margin:0; padding-right:18px; line-height:2">
+        <li>اپ سندباکس باز بمونه (حداقل در پس‌زمینه)</li>
+        <li>در تنظیمات → باتری → سندباکس → «بدون محدودیت»</li>
+        <li>هر وقت خواستی با دکمه‌ی «توقف» قطعش کن</li>
+        <li>آدرس تونل بعد از هر شروعِ مجدد عوض می‌شه — آدرس جدید رو دوباره بفرست</li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<nav>
+  <button id="nb-dash" class="active" onclick="showTab('dash')"><span class="ic">📊</span>داشبورد</button>
+  <button id="nb-term" onclick="showTab('term')"><span class="ic">🐧</span>ترمینال</button>
+  <button id="nb-py" onclick="showTab('py')"><span class="ic">🐍</span>پایتون</button>
+  <button id="nb-docs" onclick="showTab('docs')"><span class="ic">🗂️</span>اسناد</button>
+  <button id="nb-link" onclick="showTab('link')"><span class="ic">🌉</span>اتصال</button>
+</nav>
+
+<!-- ویرایشگر سند -->
+<div class="modal" id="docModal">
+  <div class="sheet">
+    <h3>📝 ویرایش سند</h3>
+    <div class="lbl">نام سند</div>
+    <input type="text" id="docName" dir="auto" placeholder="مثلاً: یادداشت-جمعه.txt">
+    <div class="lbl">محتوا</div>
+    <textarea id="docContent" dir="auto" spellcheck="false" placeholder="متن سند…"></textarea>
+    <div class="row" style="margin-top:12px">
+      <button class="small" onclick="saveDoc()">💾 ذخیره</button>
+      <button class="small ghost" id="btnExportDoc" onclick="exportCurrentDoc()">📤 خروجی</button>
+      <button class="small danger" onclick="removeCurrentDoc()">🗑 حذف</button>
+      <button class="small ghost" onclick="closeModal()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+'use strict';
+var hasApp = !!(window.Android && window.Android.listDocs);
+
+/* ---------- ابزار ---------- */
+function fmtBytes(n){
+  if(!isFinite(n)) return '—';
+  var u=['B','KB','MB','GB','TB'], i=0;
+  while(n>=1024 && i<u.length-1){ n/=1024; i++; }
+  return (i===0? n : n.toFixed(n>=100?0:1)) + ' ' + u[i];
+}
+function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function toast(msg){
+  var t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._h); t._h=setTimeout(function(){ t.classList.remove('show'); },2400);
+}
+function copyText(txt, okMsg){
+  try{
+    var ta=document.createElement('textarea');
+    ta.value=txt; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    var ok=document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast(ok? (okMsg||'کپی شد ✔') : 'کپی نشد!');
+  }catch(e){ toast('کپی نشد!'); }
+}
+function sq(s){ return "'" + String(s).replace(/'/g, "'\\''") + "'"; }
+
+/* ---------- اجرای شل (async) ---------- */
+var execSeq=0, execWait={};
+function aexec(cmd, opts){
+  opts=opts||{};
+  return new Promise(function(res){
+    var id=++execSeq;
+    execWait[id]=res;
+    try{
+      Android.execStart(id, cmd, opts.cwd||null, opts.timeout||60,
+                        opts.stdin!==undefined? opts.stdin : null);
+    }catch(e){ delete execWait[id]; res({exit:-9, out:'exec error: '+e}); }
+  });
+}
+window._execDone=function(id, exit, out){
+  var r=execWait[id];
+  if(r){ delete execWait[id]; r({exit:exit, out:out}); }
+};
+
+/* ---------- نصب: پیشرفت ---------- */
+window._installProgress=function(pct,msg){
+  var w=document.getElementById('progWrap');
+  w.classList.add('show');
+  document.getElementById('progBar').style.width=Math.max(1,Math.min(100,pct))+'%';
+  if(msg) document.getElementById('progMsg').textContent=msg;
+};
+function progHide(){ document.getElementById('progWrap').classList.remove('show'); }
+window._installDone=function(ok,msg){ progHide(); toast(msg||''); refresh(); if(ok) termHello(); };
+window._pkgsDone=function(ok,msg){ progHide(); toast(msg||''); refresh(); };
+
+/* ---------- تونل: رویدادها ---------- */
+window._tunnelUrl=function(url){
+  document.getElementById('tunnelMsg').innerHTML='✅ متصل! آدرس پایین رو برای ایجنت بفرست.';
+  document.getElementById('linkInfo').style.display='';
+  document.getElementById('kvUrl').textContent='URL: '+url;
+  document.getElementById('kvToken').textContent='TOKEN: '+(hasApp?Android.getToken():'');
+  toast('تونل وصل شد ✔'); refresh();
+};
+window._tunnelMsg=function(m){
+  document.getElementById('tunnelMsg').textContent=m;
+};
+function linkStart(){
+  if(!hasApp) return;
+  document.getElementById('linkInfo').style.display='none';
+  var url=Android.getTunnelUrl();
+  if(url){ _tunnelUrl(url); return; }
+  Android.tunnelStart();
+}
+function copyLinkInfo(){
+  var u=document.getElementById('kvUrl').textContent.replace('URL: ','');
+  var t=document.getElementById('kvToken').textContent.replace('TOKEN: ','');
+  copyText(u+'\n'+t, 'هر دو خط کپی شد ✔');
+}
+function loadProxy(){
+  if(!hasApp) return;
+  document.getElementById('proxyIn').value=Android.getProxy()||'';
+}
+function saveProxy(){
+  if(!hasApp) return;
+  Android.setProxy(document.getElementById('proxyIn').value||'');
+  toast('تنظیم پروکسی ذخیره شد ✔');
+}
+
+/* ---------- تب‌ها ---------- */
+function showTab(t){
+  ['dash','term','py','pkg','docs','link'].forEach(function(x){
+    document.getElementById('tab-'+x).classList.toggle('active', x===t);
+    document.getElementById('nb-'+x).classList.toggle('active', x===t);
+  });
+  if(t==='dash') refresh();
+  if(t==='docs') loadDocs();
+  if(t==='pkg') pkgTabLoad();
+  if(t==='link') loadProxy();
+  if(t==='term' && !termBooted) termBoot();
+}
+
+/* ---------- داشبورد ---------- */
+function refresh(){
+  if(!hasApp){ return; }
+  try{
+    var i=JSON.parse(Android.info());
+    var ramUsed=i.ram_total? (i.ram_total-i.ram_available)/i.ram_total:0;
+    var romUsed=i.storage_total? (i.storage_total-i.storage_free)/i.storage_total:0;
+    document.getElementById('ramAvail').textContent=fmtBytes(i.ram_available);
+    document.getElementById('ramSub').textContent='در دسترس از '+fmtBytes(i.ram_total);
+    document.getElementById('ramBar').style.width=Math.min(100,ramUsed*100).toFixed(1)+'%';
+    document.getElementById('romFree').textContent=fmtBytes(i.storage_free);
+    document.getElementById('romSub').textContent='آزاد از '+fmtBytes(i.storage_total);
+    document.getElementById('romBar').style.width=Math.min(100,romUsed*100).toFixed(1)+'%';
+    document.getElementById('boxSize').textContent=fmtBytes(i.box_used||0);
+    document.getElementById('boxSub').textContent=(i.box_files||0)+' سند';
+    document.getElementById('subtitle').textContent=(i.model||'')+' • اندروید '+(i.android||'؟');
+    setChip('chip-linux', i.linux, 'لینوکس', 'نصب ✔', 'نصب نشده');
+    setChip('chip-python', i.python, 'پایتون', 'نصب ✔', 'نصب نشده');
+    setChip('chip-tunnel', !!i.tunnel, 'تونل', 'وصل است', 'خاموش');
+    document.getElementById('btnLinux').disabled=!!i.linux;
+    document.getElementById('btnPkgs').disabled=!!i.python;
+  }catch(e){}
+  loadDocs();
+}
+function setChip(id,on,label,okTx,offTx){
+  var c=document.getElementById(id);
+  c.className='chip '+(on?'on':'off');
+  c.innerHTML=label+': <b>'+(on?okTx:offTx)+'</b>';
+}
+
+/* آزمون رم */
+var held=[];
+function holdMem(){
+  var mb=parseInt(document.getElementById('memMB').value,10);
+  if(!mb||mb<1){ toast('یک عدد درست وارد کن'); return; }
+  try{
+    var buf=new ArrayBuffer(mb*1024*1024), u8=new Uint8Array(buf);
+    for(var p=0;p<u8.length;p+=4096) u8[p]=1;
+    held.push(buf);
+    document.getElementById('heldInfo').textContent='✔ '+fmtBytes(held.reduce(function(a,b){return a+b.byteLength;},0))+' رم گرفته شد.';
+    refresh();
+  }catch(e){ document.getElementById('heldInfo').textContent='✖ سقف پر شد! ('+e.message+')'; }
+}
+function freeMem(){ held=[]; refresh(); document.getElementById('heldInfo').textContent='آزاد شد.'; }
+
+/* ---------- ترمینال ---------- */
+var termCwd=null, termBusy=false, termBooted=false, termHist=[], termHi=-1;
+var termOut=document.getElementById('termOut'), termIn=document.getElementById('termIn');
+function termPrint(txt, cls){
+  var sp=document.createElement('span');
+  sp.className=cls||'';
+  sp.textContent=txt;
+  termOut.appendChild(sp);
+  termOut.appendChild(document.createTextNode('\n'));
+  termOut.scrollTop=termOut.scrollHeight;
+}
+function termClear(){ termOut.innerHTML=''; }
+function shortCwd(c){
+  if(!c) return '~';
+  return c.indexOf('/home')>=0? '~'+c.substring(c.lastIndexOf('/home')+5) : c;
+}
+function termBoot(){
+  termBooted=true;
+  if(!hasApp || !Android.bootstrapReady()) return;
+  aexec('pwd && echo SDBOX-READY', {timeout:20}).then(function(r){
+    termCwd=(r.out||'').split('\n')[0].trim()||null;
+    termHello();
+  });
+}
+function termHello(){
+  if(termOut.dataset.hello) return;
+  if(!hasApp || !Android.bootstrapReady()) return;
+  termOut.dataset.hello='1';
+  termClear();
+  termPrint('╭─ سندباکس • بش لینوکس روی گوشی', 't-p');
+  termPrint('╰─ راهنما: دستور بنویس و Enter بزن — مثل یک ترمینال واقعی', 't-sys');
+  termPrint('');
+}
+function quickCmd(c){ termIn.value=c; termRun(); }
+function termRun(){
+  if(!hasApp) return;
+  var cmd=termIn.value;
+  if(!cmd.trim()) return;
+  if(termBusy){ toast('صبر کن، دستور قبلی تموم شه'); return; }
+  if(!Android.bootstrapReady()){ toast('اول لینوکس رو از داشبورد نصب کن'); showTab('dash'); return; }
+  termHist.push(cmd); termHi=termHist.length; termIn.value='';
+  try{ localStorage.setItem('sb_hist', JSON.stringify(termHist.slice(-80))); }catch(e){}
+  termPrint('$ '+cmd, 't-in');
+  termBusy=true;
+  var full='cd '+sq(termCwd||'~')+' 2>/dev/null; '+cmd+'; printf "\\n__CWD__%s" "$(pwd)"';
+  aexec(full, {timeout:120}).then(function(r){
+    termBusy=false;
+    var lines=(r.out||'').split('\n');
+    for(var i=0;i<lines.length;i++){
+      if(lines[i].lastIndexOf('__CWD__',0)===0){
+        var nc=lines[i].substring(7).trim();
+        if(nc) termCwd=nc;
+        continue;
+      }
+      if(lines[i]==='' && i===lines.length-1) continue;
+      termPrint(lines[i], r.exit!==0 && i===lines.length-1 && r.exit!==0 ? 't-err':'');
+    }
+    if(r.exit!==0) termPrint('[exit '+r.exit+']', 't-err');
+  });
+}
+termIn.addEventListener('keydown', function(e){
+  if(e.key==='Enter') termRun();
+  else if(e.key==='ArrowUp'){ e.preventDefault();
+    if(termHi>0){ termHi--; termIn.value=termHist[termHi]||''; } }
+  else if(e.key==='ArrowDown'){ e.preventDefault();
+    if(termHi<termHist.length-1){ termHi++; termIn.value=termHist[termHi]||''; }
+    else { termHi=termHist.length; termIn.value=''; } }
+});
+try{ termHist=JSON.parse(localStorage.getItem('sb_hist')||'[]'); termHi=termHist.length; }catch(e){}
+
+/* ---------- پایتون ---------- */
+var pyEditor=document.getElementById('pyEditor');
+var pyOut=document.getElementById('pyOut');
+var PY_DEFAULT=[
+  '# 🐍 پایتون روی گوشی خودت!',
+  'import platform, sys',
+  'print("سلام از سندباکس!")',
+  'print("پایتون:", sys.version.split()[0])',
+  'print("پردازنده:", platform.machine())',
+  '',
+  'total = sum(range(10_000_000))',
+  'print("مجموع ۰ تا ۱۰میلیون:", total)'
+].join('\\n');
+try{ pyEditor.value=localStorage.getItem('sb_py')||PY_DEFAULT; }catch(e){ pyEditor.value=PY_DEFAULT; }
+pyEditor.addEventListener('input', function(){ try{ localStorage.setItem('sb_py', pyEditor.value); }catch(e){} });
+function pyPrint(txt, cls){
+  var sp=document.createElement('span'); sp.className=cls||''; sp.textContent=txt;
+  pyOut.appendChild(sp); pyOut.appendChild(document.createTextNode('\\n'));
+  pyOut.className=''; pyOut.scrollTop=pyOut.scrollHeight;
+}
+function pyClear(){ pyOut.innerHTML=''; pyOut.className='t-sys'; }
+function pyRun(){
+  if(!hasApp) return;
+  if(!Android.pythonReady()){ toast('اول «پایتون + تونل» رو از داشبورد نصب کن'); showTab('dash'); return; }
+  pyClear(); pyOut.className='';
+  pyPrint('▶ اجرا روی پردازنده‌ی گوشی…', 't-sys');
+  document.getElementById('pyRunBtn').disabled=true;
+  aexec('python3 -', {stdin: pyEditor.value, timeout:180}).then(function(r){
+    document.getElementById('pyRunBtn').disabled=false;
+    (r.out||'').split('\\n').forEach(function(l){ pyPrint(l, ''); });
+    if(r.exit!==0) pyPrint('[exit '+r.exit+']', 't-err');
+  });
+}
+function pySaveDoc(){
+  var name=prompt('نام فایل پایتون:','script-'+Date.now()+'.py');
+  if(!name) return;
+  if(Android.writeDoc(name, pyEditor.value)){ toast('ذخیره شد ✔'); }
+  else toast('ذخیره نشد!');
+}
+
+/* ---------- اسناد (مثل قبل) ---------- */
+var currentDoc=null;
+function loadDocs(){
+  var listEl=document.getElementById('docList'), stat=document.getElementById('docsStat');
+  if(!hasApp) return;
+  var docs=[];
+  try{ docs=JSON.parse(Android.listDocs()); }catch(e){ docs=[]; }
+  var total=0; docs.forEach(function(d){ total+=d.size; });
+  stat.textContent=docs.length+' سند • '+fmtBytes(total);
+  if(!docs.length){
+    listEl.innerHTML='<div class="empty">باکس خاليه — «＋ سند جديد» رو بزن.</div>';
+    return;
+  }
+  var h='';
+  docs.forEach(function(d){
+    h+='<div class="doc" onclick="openDoc('+JSON.stringify(JSON.stringify(d.name))+')">'+
+       '<span class="ic">📄</span><span class="grow"><span class="nm">'+esc(d.name)+'</span>'+
+       '<div class="mt">'+fmtBytes(d.size)+' • '+new Date(d.date).toLocaleDateString('fa-IR')+'</div></span>'+
+       '<span style="color:var(--muted)">›</span></div>';
+  });
+  listEl.innerHTML=h;
+}
+function closeModal(){ document.getElementById('docModal').classList.remove('open'); }
+function openEditor(name, content){
+  currentDoc=name;
+  document.getElementById('docName').value=name||'';
+  document.getElementById('docContent').value=content||'';
+  document.getElementById('btnExportDoc').style.display = name? '':'none';
+  document.getElementById('docModal').classList.add('open');
+}
+function newDoc(){ openEditor('',''); }
+function openDoc(name){
+  var c=Android.readDoc(name);
+  if(c===null||c===undefined){ toast('خواندن ممکن نشد'); return; }
+  openEditor(name,c);
+}
+function saveDoc(){
+  var name=document.getElementById('docName').value.trim();
+  var content=document.getElementById('docContent').value;
+  if(!name){ toast('نام سند را بنویس'); return; }
+  if(/[/\\\\]|\.\./.test(name)){ toast('در نام از / یا .. استفاده نکن'); return; }
+  if(Android.writeDoc(name,content)){ toast('ذخیره شد ✔'); closeModal(); loadDocs(); }
+  else toast('ذخیره نشد!');
+}
+function exportCurrentDoc(){ if(currentDoc) Android.exportDoc(currentDoc); }
+function removeCurrentDoc(){
+  if(!currentDoc){ closeModal(); return; }
+  if(confirm('«'+currentDoc+'» حذف شود؟')){
+    Android.deleteDoc(currentDoc);
+    closeModal(); loadDocs();
+  }
+}
+
+window.refresh=refresh;
+window.addEventListener('load', refresh);
+</script>
+</body>
+</html>
+'));
+  pyOut.className=''; pyOut.scrollTop=pyOut.scrollHeight;
+}
+function pyClear(){ pyOut.innerHTML=''; pyOut.className='t-sys'; }
+function pyRun(){
+  if(!hasApp) return;
+  if(!Android.pythonReady()){ toast('اول «پایتون + تونل» رو از داشبورد نصب کن'); showTab('dash'); return; }
+  pyClear(); pyOut.className='';
+  pyPrint('▶ اجرا روی پردازنده‌ی گوشی…', 't-sys');
+  document.getElementById('pyRunBtn').disabled=true;
+  aexec('python3 -', {stdin: pyEditor.value, timeout:180}).then(function(r){
+    document.getElementById('pyRunBtn').disabled=false;
+    (r.out||'').split('\\n').forEach(function(l){ pyPrint(l, ''); });
+    if(r.exit!==0) pyPrint('[exit '+r.exit+']', 't-err');
+  });
+}
+function pySaveDoc(){
+  var name=prompt('نام فایل پایتون:','script-'+Date.now()+'.py');
+  if(!name) return;
+  if(Android.writeDoc(name, pyEditor.value)){ toast('ذخیره شد ✔'); }
+  else toast('ذخیره نشد!');
+}
+
+/* ---------- اسناد (مثل قبل) ---------- */
+var currentDoc=null;
+function loadDocs(){
+  var listEl=document.getElementById('docList'), stat=document.getElementById('docsStat');
+  if(!hasApp) return;
+  var docs=[];
+  try{ docs=JSON.parse(Android.listDocs()); }catch(e){ docs=[]; }
+  var total=0; docs.forEach(function(d){ total+=d.size; });
+  stat.textContent=docs.length+' سند • '+fmtBytes(total);
+  if(!docs.length){
+    listEl.innerHTML='<div class="empty">باکس خاليه — «＋ سند جديد» رو بزن.</div>';
+    return;
+  }
+  var h='';
+  docs.forEach(function(d){
+    h+='<div class="doc" onclick="openDoc('+JSON.stringify(JSON.stringify(d.name))+')">'+
+       '<span class="ic">📄</span><span class="grow"><span class="nm">'+esc(d.name)+'</span>'+
+       '<div class="mt">'+fmtBytes(d.size)+' • '+new Date(d.date).toLocaleDateString('fa-IR')+'</div></span>'+
+       '<span style="color:var(--muted)">›</span></div>';
+  });
+  listEl.innerHTML=h;
+}
+function closeModal(){ document.getElementById('docModal').classList.remove('open'); }
+function openEditor(name, content){
+  currentDoc=name;
+  document.getElementById('docName').value=name||'';
+  document.getElementById('docContent').value=content||'';
+  document.getElementById('btnExportDoc').style.display = name? '':'none';
+  document.getElementById('docModal').classList.add('open');
+}
+function newDoc(){ openEditor('',''); }
+function openDoc(name){
+  var c=Android.readDoc(name);
+  if(c===null||c===undefined){ toast('خواندن ممکن نشد'); return; }
+  openEditor(name,c);
+}
+function saveDoc(){
+  var name=document.getElementById('docName').value.trim();
+  var content=document.getElementById('docContent').value;
+  if(!name){ toast('نام سند را بنویس'); return; }
+  if(/[/\\\\]|\.\./.test(name)){ toast('در نام از / یا .. استفاده نکن'); return; }
+  if(Android.writeDoc(name,content)){ toast('ذخیره شد ✔'); closeModal(); loadDocs(); }
+  else toast('ذخیره نشد!');
+}
+function exportCurrentDoc(){ if(currentDoc) Android.exportDoc(currentDoc); }
+function removeCurrentDoc(){
+  if(!currentDoc){ closeModal(); return; }
+  if(confirm('«'+currentDoc+'» حذف شود؟')){
+    Android.deleteDoc(currentDoc);
+    closeModal(); loadDocs();
+  }
+}
+
+window.refresh=refresh;
+window.addEventListener('load', refresh);
+</script>
+</body>
+</html>
