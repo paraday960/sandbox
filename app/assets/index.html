@@ -6,117 +6,166 @@
 <title>سندباکس ۲</title>
 <style>
   :root{
-    --bg:#0b1220; --card:#121a2b; --card2:#0f1626; --border:#1f2a44;
-    --text:#e2e8f0; --muted:#8b9cc0; --cyan:#22d3ee; --violet:#818cf8;
-    --ok:#34d399; --warn:#fbbf24; --err:#f87171;
+    --bg:#090E1C; --surface:#101830; --surface2:#0C1222; --raise:#141D38;
+    --border:rgba(148,163,184,.13); --border2:rgba(148,163,184,.22);
+    --text:#F1F5F9; --muted:#8DA2C0; --faint:#5B6E8C;
+    --cyan:#22D3EE; --violet:#818CF8; --grad:linear-gradient(135deg,#22D3EE,#818CF8);
+    --ok:#34D399; --warn:#FBBF24; --err:#F87171;
+    --r-lg:20px; --r-md:14px; --r-sm:11px;
+    --shadow:0 10px 30px rgba(2,6,20,.45);
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  html,body{margin:0; padding:0; background:var(--bg); color:var(--text);
-    font-family:'Vazirmatn','Segoe UI',Tahoma,sans-serif; font-size:15px;}
-  header{
-    position:sticky; top:0; z-index:5; display:flex; align-items:center; gap:12px;
-    padding:13px 16px 11px; background:linear-gradient(135deg,#0e1a33,#0b1220 70%);
-    border-bottom:1px solid var(--border);
-  }
-  .logo{width:42px; height:42px; flex:0 0 42px; border-radius:12px; display:flex;
-    align-items:center; justify-content:center; background:linear-gradient(135deg,var(--cyan),var(--violet));
-    box-shadow:0 4px 18px rgba(34,211,238,.35);}
-  header h1{margin:0; font-size:19px;}
-  header p{margin:2px 0 0; font-size:11.5px; color:var(--muted);}
-  main{padding:14px 14px calc(128px + env(safe-area-inset-bottom));}
-  section{display:none;}
-  section.active{display:block;}
-  .card{background:var(--card); border:1px solid var(--border); border-radius:16px;
-    padding:14px; margin-bottom:12px;}
-  .card h3{margin:0 0 10px; font-size:14px; color:var(--muted); font-weight:600;}
-  .big{font-size:23px; font-weight:700; margin-bottom:2px;}
-  .sub{font-size:12px; color:var(--muted);}
-  .bar{height:8px; border-radius:99px; background:#1a2440; margin-top:10px; overflow:hidden;}
-  .bar>i{display:block; height:100%; border-radius:99px; width:0%;
-    background:linear-gradient(90deg,var(--cyan),var(--violet)); transition:width .3s;}
-  .row{display:flex; gap:10px; flex-wrap:wrap; align-items:center;}
-  .row>.card{flex:1 1 150px;}
-  button{border:none; border-radius:12px; padding:11px 16px; font-size:14px; font-weight:600;
-    font-family:inherit; cursor:pointer; color:#06121f; background:linear-gradient(135deg,var(--cyan),var(--violet));
-    box-shadow:0 3px 14px rgba(34,211,238,.25);}
-  button.ghost{background:var(--card2); color:var(--text); border:1px solid var(--border); box-shadow:none;}
-  button.danger{background:transparent; border:1px solid #3b2030; color:var(--err); box-shadow:none;}
-  button.small{padding:8px 12px; font-size:13px; border-radius:10px;}
-  button:disabled{opacity:.45;}
-  input[type=number], input[type=text]{
-    background:var(--card2); border:1px solid var(--border); color:var(--text);
-    border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; width:110px;}
-  input[type=text]{width:100%;}
-  nav{position:fixed; bottom:0; left:0; right:0; display:flex; flex-wrap:wrap; z-index:5;
-    background:rgba(11,18,32,.94); backdrop-filter:blur(10px); border-top:1px solid var(--border);
-    padding-bottom:env(safe-area-inset-bottom);}
-  nav button{flex:1 1 19%; min-width:0; background:none; box-shadow:none; color:var(--muted); border-radius:0;
-    padding:7px 1px 8px; font-size:10.5px; display:flex; flex-direction:column; gap:3px; align-items:center;
-    overflow:hidden; white-space:nowrap;}
-  nav button .ic{font-size:17px;}
-  nav button.active{color:var(--cyan);}
+  html,body{margin:0; padding:0; background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(129,140,248,.10), transparent 60%),
+    radial-gradient(900px 400px at -10% 0%, rgba(34,211,238,.07), transparent 55%),
+    var(--bg);
+    color:var(--text); font-family:Vazirmatn,'Segoe UI',Tahoma,sans-serif; font-size:15px;
+    -webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:5px;height:5px} ::-webkit-scrollbar-thumb{background:#233254;border-radius:9px}
+
+  /* ───── هدر ───── */
+  header{position:sticky; top:0; z-index:40; padding:12px 16px 10px;
+    background:rgba(9,14,28,.82); backdrop-filter:blur(14px);
+    border-bottom:1px solid var(--border);}
+  .hrow{display:flex; align-items:center; gap:12px;}
+  .logo{width:40px;height:40px;flex:0 0 40px;border-radius:13px;display:flex;align-items:center;justify-content:center;
+    background:var(--grad); box-shadow:0 6px 18px rgba(34,211,238,.30);}
+  header h1{margin:0;font-size:16.5px;letter-spacing:.2px}
+  header p{margin:2px 0 0;font-size:11px;color:var(--muted)}
+  .pills{display:flex;gap:6px;margin-top:9px;overflow-x:auto;scrollbar-width:none}
+  .pills::-webkit-scrollbar{display:none}
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:99px;font-size:10.5px;
+    border:1px solid var(--border2); background:var(--surface2); color:var(--muted); white-space:nowrap}
+  .pill .dot{width:6px;height:6px;border-radius:99px;background:#64748B}
+  .pill.on{color:var(--ok);border-color:rgba(52,211,153,.35)} .pill.on .dot{background:var(--ok);
+    box-shadow:0 0 8px rgba(52,211,153,.7)}
+
+  main{padding:16px 14px calc(86px + env(safe-area-inset-bottom)); max-width:720px; margin:0 auto;}
+  section{display:none} section.active{display:block; animation:tabin .25s ease}
+  @keyframes tabin{from{opacity:0;transform:translateY(7px)}to{opacity:1;transform:none}}
+
+  /* ───── کارت‌ها ───── */
+  .card{background:linear-gradient(180deg,rgba(20,29,56,.65),var(--surface2));
+    border:1px solid var(--border); border-radius:var(--r-lg); padding:16px; margin-bottom:13px;
+    box-shadow:var(--shadow);}
+  .card h3{margin:0 0 12px;font-size:12.5px;color:var(--muted);font-weight:700;letter-spacing:.3px}
+  .big{font-size:26px;font-weight:800;letter-spacing:-.3px}
+  .sub{font-size:11.5px;color:var(--muted);line-height:1.8}
+  .bar{height:7px;border-radius:99px;background:#1A2440;margin-top:10px;overflow:hidden}
+  .bar>i{display:block;height:100%;border-radius:99px;background:var(--grad);width:0%;transition:width .5s ease}
+  .row{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+  .row>.card{flex:1 1 150px}
+  .metric{padding:14px}
+  .metric .lbl{font-size:10.5px;color:var(--faint);font-weight:700;letter-spacing:.5px;margin-bottom:6px;text-transform:uppercase}
+
+  /* ───── دکمه‌ها ───── */
+  button{border:none;border-radius:var(--r-md);padding:12px 18px;font-size:13.5px;font-weight:700;
+    font-family:inherit;cursor:pointer;color:#08131F;background:var(--grad);
+    box-shadow:0 6px 16px rgba(34,211,238,.22);transition:transform .12s ease,opacity .2s}
+  button:active{transform:scale(.96)}
+  button:disabled{opacity:.38;box-shadow:none}
+  button.ghost{background:var(--raise);color:var(--text);border:1px solid var(--border2);box-shadow:none}
+  button.danger{background:transparent;border:1px solid rgba(248,113,113,.35);color:var(--err);box-shadow:none}
+  button.small{padding:9px 14px;font-size:12.5px;border-radius:var(--r-sm)}
+  input[type=number],input[type=text],select,textarea{width:100%;background:var(--surface2);color:var(--text);
+    border:1px solid var(--border2);border-radius:var(--r-sm);padding:11px 13px;font-size:13.5px;font-family:inherit;
+    outline:none;transition:border .2s}
+  input:focus,textarea:focus,select:focus{border-color:rgba(34,211,238,.55)}
+  textarea{resize:vertical}
+  .termrow{display:flex;gap:8px;margin-top:10px}
+  .termrow input{flex:1}
+
+  /* ───── ناوبری اصلی ───── */
+  nav{position:fixed;bottom:0;left:0;right:0;z-index:50;display:flex;
+    background:rgba(9,14,28,.92);backdrop-filter:blur(16px);
+    border-top:1px solid var(--border);padding-bottom:env(safe-area-inset-bottom)}
+  nav button{flex:1;min-width:0;background:none;box-shadow:none;color:var(--faint);border-radius:0;
+    padding:9px 2px 10px;font-size:10.5px;font-weight:600;display:flex;flex-direction:column;gap:4px;
+    align-items:center;position:relative;overflow:hidden;white-space:nowrap}
+  nav button .ic{font-size:20px;filter:grayscale(1) opacity(.75);transition:.2s}
+  nav button.active{color:var(--text)}
+  nav button.active .ic{filter:none;transform:translateY(-1px)}
+  nav button.active::after{content:'';position:absolute;top:0;width:26px;height:3px;border-radius:99px;background:var(--grad)}
+
+  /* ───── منوی بیشتر ───── */
+  .more{position:fixed;inset:0;z-index:60;background:rgba(4,8,18,.72);display:none;
+    align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+  .more.open{display:flex;animation:fadein .18s ease}
+  @keyframes fadein{from{opacity:0}to{opacity:1}}
+  .more-sheet{background:var(--surface);border:1px solid var(--border2);border-bottom:none;
+    border-radius:26px 26px 0 0;width:100%;max-width:720px;padding:10px 16px calc(20px + env(safe-area-inset-bottom))}
+  .grab{width:42px;height:4.5px;border-radius:99px;background:#2A3A61;margin:4px auto 14px}
+  .more-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .mi{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-md);
+    padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;
+    color:var(--text);font-size:12px;font-weight:600;transition:transform .12s}
+  .mi:active{transform:scale(.95)}
+  .mi .ic{font-size:26px}
+  .mi small{color:var(--faint);font-size:9.5px;font-weight:400}
+
+  /* ───── اجزای دیگر ───── */
   .note{background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(129,140,248,.08));
-    border:1px solid rgba(34,211,238,.25);}
-  textarea{width:100%; background:var(--card2); color:#d7e3f4; border:1px solid var(--border);
-    border-radius:12px; padding:12px; font-size:13px; font-family:ui-monospace,Consolas,monospace;
-    direction:ltr; text-align:left; resize:vertical;}
-  #pyEditor{min-height:180px; line-height:1.6;}
-  pre{margin:0; white-space:pre-wrap; word-break:break-word;}
-  #termOut{background:#0a101c; border:1px solid var(--border); border-radius:12px;
-    padding:12px; min-height:230px; max-height:46vh; overflow:auto;
-    direction:ltr; text-align:left; font-size:12.5px; font-family:ui-monospace,Consolas,monospace;
-    line-height:1.5;}
-  .t-p{color:var(--cyan);}
-  .t-in{color:var(--warn);}
-  .t-err{color:var(--err);}
-  .t-sys{color:var(--muted);}
-  .termrow{display:flex; gap:8px; margin-top:10px;}
-  #termIn{flex:1; direction:ltr; text-align:left; font-family:ui-monospace,Consolas,monospace;}
-  .chip{display:inline-flex; align-items:center; gap:6px; padding:5px 11px; border-radius:99px;
-    font-size:12px; border:1px solid var(--border); background:var(--card2); margin:0 0 8px 6px;}
-  .chip b{font-weight:600;}
-  .chip.on{border-color:rgba(52,211,153,.5);} .chip.on b{color:var(--ok);}
-  .chip.off b{color:var(--muted);}
-  .doc{display:flex; align-items:center; gap:10px; background:var(--card2); border:1px solid var(--border);
-    border-radius:14px; padding:12px; margin-bottom:9px;}
-  .doc .nm{font-weight:600; word-break:break-all;}
-  .doc .mt{font-size:11px; color:var(--muted); margin-top:3px;}
-  .doc .grow{flex:1; min-width:0;}
-  .doc .ic{font-size:22px;}
-  .empty{text-align:center; color:var(--muted); padding:26px 8px; font-size:13px;}
-  .modal{position:fixed; inset:0; z-index:9; background:rgba(4,8,16,.7); display:none;
-    align-items:flex-end; justify-content:center;}
-  .modal.open{display:flex;}
-  .sheet{background:var(--card); border:1px solid var(--border); border-radius:20px 20px 0 0;
-    width:100%; max-width:640px; padding:16px 16px calc(18px + env(safe-area-inset-bottom));
-    max-height:88vh; overflow:auto;}
-  .sheet h3{margin:0 0 12px;}
-  .lbl{font-size:12px; color:var(--muted); margin:10px 0 6px;}
-  #toast{position:fixed; bottom:84px; left:50%; transform:translateX(-50%); z-index:20;
-    background:#1c2742; color:var(--text); border:1px solid var(--border); padding:9px 18px;
-    border-radius:99px; font-size:13px; opacity:0; transition:opacity .25s; pointer-events:none;
-    max-width:88%; text-align:center;}
-  #toast.show{opacity:1;}
-  .kv{background:var(--card2); border:1px dashed var(--border); border-radius:12px; padding:10px 12px;
-    font-size:12.5px; direction:ltr; text-align:left; word-break:break-all; margin:8px 0;}
-  .progwrap{display:none; margin-top:10px;}
-  .progwrap.show{display:block;}
-  .held{font-size:12px; color:var(--warn); margin-top:8px;}
-  .mono{font-family:ui-monospace,Consolas,monospace; direction:ltr; unicode-bidi:embed;}
+    border:1px solid rgba(34,211,238,.22)}
+  pre{margin:0;white-space:pre-wrap;word-break:break-word}
+  #termOut{background:#070C18;border:1px solid var(--border);border-radius:var(--r-md);padding:13px;
+    min-height:220px;max-height:44vh;overflow:auto;direction:ltr;text-align:left;font-size:12.5px;
+    font-family:ui-monospace,Consolas,monospace;line-height:1.55}
+  .t-p{color:var(--cyan)} .t-in{color:var(--warn)} .t-err{color:var(--err)} .t-sys{color:var(--faint)}
+  textarea.code{font-family:ui-monospace,Consolas,monospace;direction:ltr;text-align:left}
+  .chip{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:99px;font-size:11.5px;
+    border:1px solid var(--border2);background:var(--surface2);margin:0 0 8px 6px}
+  .chip b{font-weight:700} .chip.on{border-color:rgba(52,211,153,.45)} .chip.on b{color:var(--ok)}
+  .chip.off b{color:var(--muted)}
+  .doc{display:flex;align-items:center;gap:11px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--r-md);padding:12px;margin-bottom:9px;transition:background .15s}
+  .doc:active{background:var(--raise)}
+  .doc .nm{font-weight:600;word-break:break-all} .doc .mt{font-size:10.5px;color:var(--faint);margin-top:3px}
+  .doc .grow{flex:1;min-width:0} .doc .ic{font-size:22px}
+  .empty{text-align:center;color:var(--faint);padding:30px 10px;font-size:13px;line-height:2}
+  .modal{position:fixed;inset:0;z-index:70;background:rgba(4,8,18,.74);display:none;
+    align-items:flex-end;justify-content:center;backdrop-filter:blur(4px)}
+  .modal.open{display:flex;animation:fadein .18s ease}
+  .sheet{background:var(--surface);border:1px solid var(--border2);border-bottom:none;
+    border-radius:26px 26px 0 0;width:100%;max-width:720px;
+    padding:10px 16px calc(20px + env(safe-area-inset-bottom));max-height:88vh;overflow:auto}
+  .sheet h3{margin:6px 0 12px;font-size:15px}
+  .lbl{font-size:11px;color:var(--faint);font-weight:700;margin:11px 0 6px}
+  #toast{position:fixed;bottom:82px;left:50%;transform:translateX(-50%) translateY(8px);z-index:90;
+    background:#1B2742;color:var(--text);border:1px solid var(--border2);
+    padding:10px 20px;border-radius:99px;font-size:12.5px;opacity:0;transition:.25s;pointer-events:none;
+    max-width:88%;text-align:center;box-shadow:var(--shadow)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .held{font-size:12px;color:var(--warn);margin-top:8px}
+  .mono{font-family:ui-monospace,Consolas,monospace;direction:ltr;unicode-bidi:embed}
+  .kv{background:var(--surface2);border:1px dashed var(--border2);border-radius:var(--r-sm);padding:10px 12px;
+    font-size:12px;direction:ltr;text-align:left;word-break:break-all;margin:8px 0}
+  .progwrap{display:none;margin-top:12px} .progwrap.show{display:block}
+  details.sec summary{cursor:pointer;color:var(--muted);font-size:12px;font-weight:600;padding:4px 0}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(148,163,184,.3);
+    border-top-color:var(--cyan);border-radius:99px;animation:spin .8s linear infinite;vertical-align:-2px}
+  @keyframes spin{to{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
-      <path d="M12 2 3 7v10l9 5 9-5V7l-9-5z" stroke="#06121f" stroke-width="1.6" fill="rgba(6,18,31,.35)"/>
-      <path d="M3 7l9 5 9-5M12 12v10" stroke="#06121f" stroke-width="1.6"/>
-    </svg>
+  <div class="hrow">
+    <div class="logo">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2 3 7v10l9 5 9-5V7l-9-5z" stroke="#08131F" stroke-width="1.7" fill="rgba(8,19,31,.35)"/>
+        <path d="M3 7l9 5 9-5M12 12v10" stroke="#08131F" stroke-width="1.7"/>
+      </svg>
+    </div>
+    <div style="flex:1">
+      <h1>سندباکس</h1>
+      <p id="subtitle">گوشیِ تو، سرورِ تو</p>
+    </div>
   </div>
-  <div>
-    <h1>سندباکس ۲</h1>
-    <p id="subtitle">گوشیِ تو، سرورِ تو — لینوکس + پایتون + تونل</p>
+  <div class="pills" id="statusPills">
+    <span class="pill" id="pill-linux"><span class="dot"></span>لینوکس</span>
+    <span class="pill" id="pill-python"><span class="dot"></span>پایتون</span>
+    <span class="pill" id="pill-tunnel"><span class="dot"></span>تونل</span>
+    <span class="pill" id="pill-ram"><span class="dot"></span>رم: —</span>
   </div>
 </header>
 
@@ -125,71 +174,80 @@
   <!-- ============ داشبورد ============ -->
   <section id="tab-dash" class="active">
     <div class="card">
-      <h3>وضعیت توانایی‌ها</h3>
-      <div>
-        <span class="chip off" id="chip-linux">🐧 <b>لینوکس: ؟</b></span>
-        <span class="chip off" id="chip-python">🐍 <b>پایتون: ؟</b></span>
-        <span class="chip off" id="chip-tunnel">🌉 <b>تونل: ؟</b></span>
+      <div class="row" style="justify-content:space-between;align-items:flex-start">
+        <div>
+          <div class="big" style="font-size:19px">سلام 👋</div>
+          <div class="sub" style="margin-top:4px">میزبانِ توسعه‌ی کامل روی گوشی تو</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+          <span class="chip off" id="chip-linux">🐧 <b>لینوکس: ؟</b></span>
+          <span class="chip off" id="chip-python">🐍 <b>پایتون: ؟</b></span>
+          <span class="chip off" id="chip-tunnel">🌉 <b>تونل: ؟</b></span>
+        </div>
       </div>
-      <div class="row" style="margin-top:10px">
-        <button class="small" id="btnLinux" onclick="Android?Android.installLinux():0">🐧 نصب لینوکس (~۳۰MB)</button>
-        <button class="small ghost" id="btnPkgs" onclick="Android?Android.installPkgs():0">🐍 پایتون + تونل (~۱۷MB)</button>
+      <div class="row" style="margin-top:14px">
+        <button id="btnLinux" onclick="Android?Android.installLinux():0">🐧 نصب لینوکس</button>
+        <button class="ghost" id="btnPkgs" onclick="Android?Android.installPkgs():0">🐍 پایتون + تونل</button>
       </div>
+      <div class="sub" style="margin-top:8px">هر دو فقط یک‌بار — بعدش همه‌چیز آفلاین در دسترسه.</div>
       <div class="progwrap" id="progWrap">
         <div class="bar" style="margin-top:4px"><i id="progBar"></i></div>
-        <div class="sub" id="progMsg" style="margin-top:6px">…</div>
+        <div class="sub" id="progMsg" style="margin-top:7px">…</div>
       </div>
-      <div class="sub" style="margin-top:8px">هر دو نصب فقط یک‌بار انجام می‌شه؛ بعدش همه‌چیز آفلاین در دسترسه.</div>
-      <div class="row" style="margin-top:8px">
-        <button class="small ghost" onclick="rebuildLinux()">♻️ بازسازی لینوکس (داده‌ها می‌مانند)</button>
+      <div style="margin-top:10px;text-align:left">
+        <button class="small ghost" onclick="rebuildLinux()">♻️ بازسازی لینوکس</button>
       </div>
-    </div>
-
-    <div class="card note">
-      <b>🛡 چرا به فایل‌های سیستم گوشی آسیبی نمی‌رسد؟</b>
-      <ul class="sub" style="margin:8px 0 0; padding-right:18px; line-height:1.9">
-        <li>اپ در سندباکس اختصاصی اندروید اجرا می‌شود — کرنل اجازه‌ی دسترسی به سیستم، اپ‌های دیگر و فایل‌های شخصی را نمی‌دهد (بدون روت غیرممکن است)</li>
-        <li>هیچ مجوز حافظه/فایل ندارد — حتی عکس‌هایت هم دیده نمی‌شوند</li>
-        <li>محیط لینوکس داخلی (usr) برای بات، ورک‌اسپیس و API <b>فقط‌خواندن</b> است</li>
-        <li>نگهبان ایمنی: دستورهای مخرب روی usr در ترمینال، بات، API و بیلد مسدود می‌شوند</li>
-        <li>بدترین حالت؟ خرابی محیط لینوکس داخلی — با ♻️ بازسازی در چند دقیقه درست می‌شود؛ داده‌های تو سالم‌اند</li>
-      </ul>
     </div>
 
     <div class="row">
-      <div class="card">
-        <h3>حافظه رم (RAM)</h3>
+      <div class="card metric">
+        <div class="lbl">رم آزاد</div>
         <div class="big" id="ramAvail">—</div>
-        <div class="sub" id="ramSub">در دسترس از —</div>
+        <div class="sub" id="ramSub">از —</div>
         <div class="bar"><i id="ramBar"></i></div>
       </div>
-      <div class="card">
-        <h3>حافظه گوشی</h3>
+      <div class="card metric">
+        <div class="lbl">حافظه آزاد</div>
         <div class="big" id="romFree">—</div>
-        <div class="sub" id="romSub">آزاد از —</div>
+        <div class="sub" id="romSub">از —</div>
         <div class="bar"><i id="romBar"></i></div>
       </div>
     </div>
 
     <div class="card">
-      <h3>باکس اسناد</h3>
-      <div class="big" id="boxSize">—</div>
-      <div class="sub" id="boxSub">—</div>
+      <div class="row" style="justify-content:space-between">
+        <div>
+          <div class="lbl" style="margin:0">باکس اسناد</div>
+          <div class="big" id="boxSize" style="margin-top:6px">—</div>
+          <div class="sub" id="boxSub">—</div>
+        </div>
+        <button class="small ghost" onclick="showTab('docs')">بازکردن ←</button>
+      </div>
     </div>
 
     <div class="card">
-      <h3>🧪 آزمون رم</h3>
+      <h3>آزمون رم</h3>
       <div class="row">
-        <input type="number" id="memMB" value="128" min="1" max="4096">
+        <input type="number" id="memMB" value="128" min="1" max="4096" style="width:96px">
         <span class="sub">مگابایت</span>
-        <button class="small" onclick="holdMem()">تخصیص بده</button>
+        <button class="small" onclick="holdMem()">تخصیص</button>
         <button class="small ghost" onclick="freeMem()">آزادسازی</button>
       </div>
       <div class="held" id="heldInfo">هیچ حافظه‌ای نگه داشته نشده.</div>
     </div>
+
+    <details class="sec card" style="padding:13px 16px">
+      <summary>🛡 چرا به فایل‌های سیستم آسیبی نمی‌رسد؟</summary>
+      <ul class="sub" style="margin:10px 0 0;padding-right:18px">
+        <li>سندباکس اختصاصی کرنل اندروید — دسترسی به سیستم/اپ‌های دیگر ناممکن</li>
+        <li>بدون مجوز حافظه — حتی عکس‌ها دیده نمی‌شوند</li>
+        <li>محیط لینوکس داخلی برای بات/ورک‌اسپیس/API فقط‌خواندن است</li>
+        <li>نگهبان دستورها: rm -rf /usr و apt remove مسدود</li>
+        <li>بدترین حالت: خرابی محیط داخلی — با ♻️ بازسازی درست می‌شود</li>
+      </ul>
+    </details>
   </section>
 
-  <!-- ============ ترمینال ============ -->
   <section id="tab-term">
     <div class="card">
       <h3>🐧 ترمینال لینوکس — بش واقعی روی گوشی</h3>
@@ -469,17 +527,25 @@
 </main>
 
 <nav>
-  <button id="nb-dash" class="active" onclick="showTab('dash')"><span class="ic">📊</span>داشبورد</button>
+  <button id="nb-dash" class="active" onclick="showTab('dash')"><span class="ic">📊</span>خانه</button>
   <button id="nb-chat" onclick="showTab('chat')"><span class="ic">🤖</span>چت</button>
   <button id="nb-term" onclick="showTab('term')"><span class="ic">🐧</span>ترمینال</button>
-  <button id="nb-py" onclick="showTab('py')"><span class="ic">🐍</span>پایتون</button>
   <button id="nb-ws" onclick="showTab('ws')"><span class="ic">📂</span>فایل‌ها</button>
-  <button id="nb-pv" onclick="showTab('pv')"><span class="ic">🖥</span>نمایش</button>
-  <button id="nb-pkg" onclick="showTab('pkg')"><span class="ic">📦</span>بسته‌ها</button>
-  <button id="nb-build" onclick="showTab('build')"><span class="ic">🛠</span>ساخت</button>
-  <button id="nb-docs" onclick="showTab('docs')"><span class="ic">🗂️</span>اسناد</button>
-  <button id="nb-link" onclick="showTab('link')"><span class="ic">🌉</span>اتصال</button>
+  <button id="nb-more" onclick="moreToggle()"><span class="ic">✨</span>بیشتر</button>
 </nav>
+<div class="more" id="moreSheet" onclick="if(event.target===this)moreToggle()">
+  <div class="more-sheet">
+    <div class="grab"></div>
+    <div class="more-grid">
+      <button class="mi" id="nb-py" onclick="showTab('py')"><span class="ic">🐍</span>پایتون<small>اجرای اسکریپت</small></button>
+      <button class="mi" id="nb-pv" onclick="showTab('pv')"><span class="ic">🖥</span>پیش‌نمایش<small>مرورگر داخلی</small></button>
+      <button class="mi" id="nb-pkg" onclick="showTab('pkg')"><span class="ic">📦</span>بسته‌ها<small>نصب از مخزن</small></button>
+      <button class="mi" id="nb-build" onclick="showTab('build')"><span class="ic">🛠</span>ساخت<small>کامپایل روی گوشی</small></button>
+      <button class="mi" id="nb-docs" onclick="showTab('docs')"><span class="ic">🗂️</span>اسناد<small>باکس اسناد</small></button>
+      <button class="mi" id="nb-link" onclick="showTab('link')"><span class="ic">🌉</span>اتصال<small>تونل راه‌دور</small></button>
+    </div>
+  </div>
+</div>
 
 <!-- ویرایشگر سند -->
 <div class="modal" id="docModal">
@@ -1020,11 +1086,16 @@ window._aiError=function(msg){
 };
 
 /* ---------- تب‌ها ---------- */
+var ALLTABS=['dash','chat','term','py','ws','pv','pkg','build','docs','link'];
+var PRIMARY=['dash','chat','term','ws'];
 function showTab(t){
-  ['dash','chat','term','py','ws','pv','pkg','build','docs','link'].forEach(function(x){
+  ALLTABS.forEach(function(x){
     document.getElementById('tab-'+x).classList.toggle('active', x===t);
-    document.getElementById('nb-'+x).classList.toggle('active', x===t);
+    var nb=document.getElementById('nb-'+x);
+    if(nb) nb.classList.toggle('active', x===t);
   });
+  document.getElementById('nb-more').classList.toggle('active', PRIMARY.indexOf(t)<0);
+  moreClose();
   if(t==='dash') refresh();
   if(t==='docs') loadDocs();
   if(t==='pkg') pkgTabLoad();
@@ -1249,87 +1320,26 @@ function removeCurrentDoc(){
   }
 }
 
-window.refresh=refresh;
-window.addEventListener('load', refresh);
-</script>
-</body>
-</html>
-'));
-  pyOut.className=''; pyOut.scrollTop=pyOut.scrollHeight;
+function moreToggle(){ document.getElementById('moreSheet').classList.toggle('open'); }
+function moreClose(){ document.getElementById('moreSheet').classList.remove('open'); }
+function setPill(id,on,txt){
+  var p=document.getElementById(id);
+  if(!p) return;
+  p.className='pill'+(on?' on':'');
+  p.innerHTML='<span class="dot"></span>'+txt;
 }
-function pyClear(){ pyOut.innerHTML=''; pyOut.className='t-sys'; }
-function pyRun(){
+var _refreshBase=refresh;
+refresh=function(){
+  _refreshBase();
   if(!hasApp) return;
-  if(!Android.pythonReady()){ toast('اول «پایتون + تونل» رو از داشبورد نصب کن'); showTab('dash'); return; }
-  pyClear(); pyOut.className='';
-  pyPrint('▶ اجرا روی پردازنده‌ی گوشی…', 't-sys');
-  document.getElementById('pyRunBtn').disabled=true;
-  aexec('python3 -', {stdin: pyEditor.value, timeout:180}).then(function(r){
-    document.getElementById('pyRunBtn').disabled=false;
-    (r.out||'').split('\\n').forEach(function(l){ pyPrint(l, ''); });
-    if(r.exit!==0) pyPrint('[exit '+r.exit+']', 't-err');
-  });
-}
-function pySaveDoc(){
-  var name=prompt('نام فایل پایتون:','script-'+Date.now()+'.py');
-  if(!name) return;
-  if(Android.writeDoc(name, pyEditor.value)){ toast('ذخیره شد ✔'); }
-  else toast('ذخیره نشد!');
-}
-
-/* ---------- اسناد (مثل قبل) ---------- */
-var currentDoc=null;
-function loadDocs(){
-  var listEl=document.getElementById('docList'), stat=document.getElementById('docsStat');
-  if(!hasApp) return;
-  var docs=[];
-  try{ docs=JSON.parse(Android.listDocs()); }catch(e){ docs=[]; }
-  var total=0; docs.forEach(function(d){ total+=d.size; });
-  stat.textContent=docs.length+' سند • '+fmtBytes(total);
-  if(!docs.length){
-    listEl.innerHTML='<div class="empty">باکس خاليه — «＋ سند جديد» رو بزن.</div>';
-    return;
-  }
-  var h='';
-  docs.forEach(function(d){
-    h+='<div class="doc" onclick="openDoc('+JSON.stringify(JSON.stringify(d.name))+')">'+
-       '<span class="ic">📄</span><span class="grow"><span class="nm">'+esc(d.name)+'</span>'+
-       '<div class="mt">'+fmtBytes(d.size)+' • '+new Date(d.date).toLocaleDateString('fa-IR')+'</div></span>'+
-       '<span style="color:var(--muted)">›</span></div>';
-  });
-  listEl.innerHTML=h;
-}
-function closeModal(){ document.getElementById('docModal').classList.remove('open'); }
-function openEditor(name, content){
-  currentDoc=name;
-  document.getElementById('docName').value=name||'';
-  document.getElementById('docContent').value=content||'';
-  document.getElementById('btnExportDoc').style.display = name? '':'none';
-  document.getElementById('docModal').classList.add('open');
-}
-function newDoc(){ openEditor('',''); }
-function openDoc(name){
-  var c=Android.readDoc(name);
-  if(c===null||c===undefined){ toast('خواندن ممکن نشد'); return; }
-  openEditor(name,c);
-}
-function saveDoc(){
-  var name=document.getElementById('docName').value.trim();
-  var content=document.getElementById('docContent').value;
-  if(!name){ toast('نام سند را بنویس'); return; }
-  if(/[/\\\\]|\.\./.test(name)){ toast('در نام از / یا .. استفاده نکن'); return; }
-  if(Android.writeDoc(name,content)){ toast('ذخیره شد ✔'); closeModal(); loadDocs(); }
-  else toast('ذخیره نشد!');
-}
-function exportCurrentDoc(){ if(currentDoc) Android.exportDoc(currentDoc); }
-function removeCurrentDoc(){
-  if(!currentDoc){ closeModal(); return; }
-  if(confirm('«'+currentDoc+'» حذف شود؟')){
-    Android.deleteDoc(currentDoc);
-    closeModal(); loadDocs();
-  }
-}
-
+  try{
+    var i=JSON.parse(Android.info());
+    setPill('pill-linux', !!i.linux, 'لینوکس');
+    setPill('pill-python', !!i.python, 'پایتون');
+    setPill('pill-tunnel', !!i.tunnel, 'تونل');
+    setPill('pill-ram', false, 'رم آزاد: '+fmtBytes(i.ram_available));
+  }catch(e){}
+};
 window.refresh=refresh;
 window.addEventListener('load', refresh);
 </script>
