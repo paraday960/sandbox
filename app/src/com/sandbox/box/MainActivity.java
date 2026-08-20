@@ -1503,7 +1503,7 @@ public class MainActivity extends Activity {
                     pb.redirectErrorStream(true);
                     final Process proc = pb.start();
                     tunnelProc = proc;
-                    Pattern urlRe = Pattern.compile("https://[a-z0-9-]+\\.trycloudflare\\.com");
+                    Pattern urlRe = Pattern.compile("https://(?!api\\.)[a-z0-9]+(?:-[a-z0-9]+)+\\.trycloudflare\\.com");
                     try (BufferedReaderWrap br = new BufferedReaderWrap(proc.getInputStream())) {
                         String line;
                         while ((line = br.readLine()) != null) {
