@@ -131,10 +131,8 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        stopTunnel();
-        stopServer();
+        // تونل و سرور عمداً زنده می‌مانند — سرویس Foreground نگه می‌دارد
         if (wakeLock != null && wakeLock.isHeld()) wakeLock.release();
-        if (cpu != null) cpu.shutdownNow();
         super.onDestroy();
     }
 
@@ -157,7 +155,7 @@ public class MainActivity extends Activity {
     private void js(final String call) {
         runOnUiThread(new Runnable() {
             @Override public void run() {
-                if (web != null) web.evaluateJavascript("try{" + call + "}catch(e){}", null);
+                if (web != null && !isDestroyed()) web.evaluateJavascript("try{" + call + "}catch(e){}", null);
             }
         });
     }
@@ -1470,6 +1468,11 @@ public class MainActivity extends Activity {
             return;
         }
         tunnelAuto = true;
+        try {
+            Intent svc = new Intent(this, TunnelService.class);
+            if (Build.VERSION.SDK_INT >= 26) startForegroundService(svc);
+            else startService(svc);
+        } catch (Exception ignored) { }
         js("_tunnelMsg('در حال ساخت تونل رایگان کلادفلر…')");
         try {
             if (wakeLock == null) {
@@ -1516,7 +1519,7 @@ public class MainActivity extends Activity {
                     int rc = proc.waitFor();
                     tunnelUrl = "";
                     tunnelProc = null;
-                    if (tunnelAuto && tunnelTries < 12) {
+                    if (tunnelAuto && tunnelTries < 40) {
                         tunnelTries++;
                         js("_tunnelMsg('اتصال قطع شد (exit " + rc + ") — تلاش مجدد " + tunnelTries + "/12…')");
                         Thread.sleep(5000);
@@ -1556,6 +1559,7 @@ public class MainActivity extends Activity {
     }
 
     public void stopTunnel() {
+        try { stopService(new Intent(this, TunnelService.class)); } catch (Exception ignored) { }
         tunnelUrl = "";
         Process p = tunnelProc;
         tunnelProc = null;
