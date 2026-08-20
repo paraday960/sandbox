@@ -127,6 +127,24 @@ public class MainActivity extends Activity {
         setContentView(web);
         web.loadUrl("file:///android_asset/index.html");
         startPreviewServer();
+
+        // بررسی سلامت محیط + ترمیم خودکار اگر بوت‌استرپ رله‌شده موجود باشد
+        new Thread(new Runnable() {
+            @Override public void run() {
+                try {
+                    Thread.sleep(2000);
+                    File b = new File(prefix, "bin/bash");
+                    File z = new File(docsDir, "bootstrap.zip");
+                    if (b.canExecute() && z.isFile() && z.length() > 10000000) {
+                        ExecOut t = runShell("echo SBXOK", null, null, 6);
+                        if (!t.out.contains("SBXOK")) {
+                            toast("🔧 خرابی محیط شناسایی شد — در حال ترمیم خودکار…");
+                            recoverEnvironmentAsync();
+                        }
+                    }
+                } catch (Exception ignored) { }
+            }
+        }).start();
     }
 
     @Override
@@ -1046,7 +1064,40 @@ public class MainActivity extends Activity {
             path = java.net.URLDecoder.decode(path, "UTF-8");
 
             /* ---------- مسیرها ---------- */
-            if (method.equals("POST") && path.equals("/pkg/install")) {
+            if (method.equals("POST") && path.equals("/self/build")) {
+                readBody(in, len, 1000);
+                buildSelfAsync();
+                writeResponse(s, 200, "application/json", json("{\"ok\":true,\"job\":\"self-build started\"}"));
+                return;
+            } else if (method.equals("POST") && path.equals("/self/install")) {
+                byte[] bb = readBody(in, len, 10000);
+                String pth = "";
+                try { pth = new JSONObject(new String(bb, StandardCharsets.UTF_8)).optString("path", ""); }
+                catch (Exception ignored) { }
+                File apkF = null;
+                if (!pth.isEmpty()) apkF = wsResolve(pth, false);
+                else {
+                    File bd = new File(home, "build");
+                    File[] ls = bd.listFiles();
+                    if (ls != null) {
+                        for (File x : ls)
+                            if (x.getName().endsWith(".apk") &&
+                                    (apkF == null || x.lastModified() > apkF.lastModified())) apkF = x;
+                    }
+                }
+                if (apkF != null && apkF.isFile()) {
+                    installApkInternal(apkF);
+                    writeResponse(s, 200, "application/json", json("{\"ok\":true,\"started\":true}"));
+                } else {
+                    writeResponse(s, 200, "application/json", json("{\"ok\":false,\"error\":\"apk not found\"}"));
+                }
+                return;
+            } else if (method.equals("POST") && path.equals("/self/recover")) {
+                readBody(in, len, 1000);
+                recoverEnvironmentAsync();
+                writeResponse(s, 200, "application/json", json("{\"ok\":true,\"job\":\"recovery started\"}"));
+                return;
+            } else if (method.equals("POST") && path.equals("/pkg/install")) {
                 byte[] body = readBody(in, len, 100000);
                 String names = "";
                 try {
@@ -2473,6 +2524,7 @@ public class MainActivity extends Activity {
         new Thread(new Runnable() {
             @Override public void run() {
                 js("_buildEvent('🪞 ساخت نسخه‌ی جدید خودِ برنامه…')");
+                ensureBuildAssets();
                 if (!buildKitReady()) {
                     js("_buildDone('✖ بیلدکیت نصب نیست — تب ساخت → نصب بیلدکیت')");
                     return;
@@ -2492,6 +2544,42 @@ public class MainActivity extends Activity {
                     }
                 }
                 js("_buildDone('✖ ساخت خودم کامل نشد — لاگ را ببین')");
+            }
+        }).start();
+    }
+
+    /** ترمیم محیط لینوکس از bootstrap.zip رله‌شده در اسناد — کاملاً جاوا، بدون شل */
+    public void recoverEnvironmentAsync() {
+        if (installing) return;
+        installing = true;
+        new Thread(new Runnable() {
+            @Override public void run() {
+                try {
+                    File z = new File(docsDir, "bootstrap.zip");
+                    if (!z.isFile() || z.length() < 10000000) {
+                        toast("فایل bootstrap.zip در اسناد نیست");
+                        installing = false;
+                        return;
+                    }
+                    toast("🔧 ترمیم محیط لینوکس (چند دقیقه)…");
+                    wsDeleteRecursive(prefix);
+                    //noinspection ResultOfMethodCallIgnored
+                    prefix.mkdirs();
+                    //noinspection ResultOfMethodCallIgnored
+                    home.mkdirs();
+                    extractBootstrapZip(z, null);
+                    makeSymlinks();
+                    //noinspection ResultOfMethodCallIgnored
+                    new File(prefix, "tmp").mkdirs();
+                    ExecOut t = runShell("echo SBXOK", null, null, 10);
+                    boolean ok = t.out.contains("SBXOK");
+                    installing = false;
+                    toast(ok ? "✅ محیط لینوکس ترمیم شد!" : "⚠ ترمیم کامل نشد — دوباره تلاش کن");
+                    js("if(window.refresh)refresh()");
+                } catch (Exception e) {
+                    installing = false;
+                    toast("خطای ترمیم: " + e);
+                }
             }
         }).start();
     }
@@ -2564,6 +2652,9 @@ public class MainActivity extends Activity {
 
         @JavascriptInterface
         public void rebuildLinux() { rebuildLinuxAsync(); }
+
+        @JavascriptInterface
+        public void selfRecover() { recoverEnvironmentAsync(); }
 
         @JavascriptInterface
         public void selfExtract() { extractSelfSource(); }
