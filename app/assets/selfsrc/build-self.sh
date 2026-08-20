@@ -6,7 +6,7 @@
 set -e
 SRC="${1:-$HOME/SandBox-src}"
 SRC="$(cd "$SRC" && pwd)"
-PREFIX="/data/data/com.sandbox.box/files/usr"
+PREFIX="/data/user/0/com.sandbox.box/files/usr"
 FILES="$PREFIX/.."
 BT="$PREFIX/bin"
 SDKJAR="$PREFIX/android-sdk/android.jar"
@@ -34,7 +34,11 @@ find "$SRC/src" -name '*.java' > "$W/sources.txt"
 
 echo "── [2/6] d8…"
 jar cf "$W/obj.jar" -C "$W/obj" . 2>/dev/null || (cd "$W/obj" && jar cf "$W/obj.jar" .)
-"$BT/d8" --release --lib "$SDKJAR" --min-api 24 --output "$W/dex" "$W/obj.jar"
+if [ -x "$BT/d8" ]; then
+  "$BT/d8" --release --lib "$SDKJAR" --min-api 24 --output "$W/dex" "$W/obj.jar"
+else
+  "$BT/dx" --dex --output "$W/dex/classes.dex" "$W/obj.jar"
+fi
 
 echo "── زنجیره‌ی نسل بعد: android.jar.gz…"
 [ -s "$SRC/assets/android.jar.gz" ] || gzip -c "$SDKJAR" > "$SRC/assets/android.jar.gz"
@@ -46,7 +50,7 @@ AOPT=(-o "$W/app.u.apk" -I "$SDKJAR" --manifest "$SRC/AndroidManifest.xml"
       --version-code "$NEW" --version-name "9.$(($NEW - 12)).self")
 [ -f "$W/res.zip" ]      && AOPT+=("$W/res.zip")
 [ -d "$SRC/assets" ]     && AOPT+=(-A "$SRC/assets")
-"$BT/aapt2" link "${AOPT[@]}" 2>/dev/null || "$BT/aapt" package -f -M "$SRC/AndroidManifest.xml" -S "$SRC/res" -I "$SDKJAR" -F "$W/app.u.apk" --min-sdk-version 24 --target-sdk-version 28 --version-code "$NEW" --version-name "9.self"
+"$BT/aapt2" link "${AOPT[@]}" 2>/dev/null || "$BT/aapt" package -f -M "$SRC/AndroidManifest.xml" -S "$SRC/res" -A "$SRC/assets" -I "$SDKJAR" -F "$W/app.u.apk" --min-sdk-version 24 --target-sdk-version 28 --version-code "$NEW" --version-name "10.self"
 
 echo "── [4/6] افزودن dex…"
 [ -s "$W/dex/classes.dex" ] || { echo "خطا: dex ساخته نشد"; exit 1; }

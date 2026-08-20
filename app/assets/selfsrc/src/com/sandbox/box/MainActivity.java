@@ -1519,6 +1519,8 @@ public class MainActivity extends Activity {
             return;
         }
         tunnelAuto = true;
+        if (checkSelfPermission("android.permission.FOREGROUND_SERVICE")
+                == android.content.pm.PackageManager.PERMISSION_GRANTED)
         try {
             Intent svc = new Intent(this, TunnelService.class);
             if (Build.VERSION.SDK_INT >= 26) startForegroundService(svc);
@@ -2375,7 +2377,8 @@ public class MainActivity extends Activity {
     private static final java.util.HashSet<String> SELF_ALLOWED_PERMS =
             new java.util.HashSet<>(Arrays.asList(
                     "android.permission.INTERNET", "android.permission.WAKE_LOCK",
-                    "android.permission.REQUEST_INSTALL_PACKAGES"));
+                    "android.permission.REQUEST_INSTALL_PACKAGES",
+                    "android.permission.FOREGROUND_SERVICE"));
 
     /** بررسی کامل APK ساخته‌شده — فقط اگر کاملاً «خودِ ما» باشد اجازه‌ی نصب می‌دهد */
     private String verifySelfApk(File apk) {

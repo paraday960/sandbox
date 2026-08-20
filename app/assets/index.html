@@ -694,7 +694,7 @@ function wsRefresh(){
       (/\.(html?|css|js|py|c|cpp|java|sh|md|txt|json|xml)$/i.test(x.name) ? '📄' :
        /\.(png|jpe?g|gif|webp|svg)$/i.test(x.name) ? '🖼' : '📦');
     var meta = x.type==='dir' ? 'پوشه' : fmtBytes(x.size);
-    h+='<div class="doc" style="padding:9px 10px" onclick="wsOpen('+JSON.stringify(JSON.stringify(wsCur+'/'+x.name))+',\''+x.type+'\')">'+
+    h+='<div class="doc" style="padding:9px 10px" onclick="wsOpen(\''+String(wsCur+'/'+x.name).replace(/'/g,'')+'\',\''+x.type+'\')">'+
        '<span class="ic" style="font-size:18px">'+ic+'</span>'+
        '<span class="grow"><span class="nm mono" style="font-size:12.5px; direction:ltr; unicode-bidi:embed; display:inline-block">'+esc(x.name)+'</span>'+
        '<div class="mt">'+meta+' • '+new Date(x.mtime).toLocaleDateString('fa-IR')+'</div></span>'+
@@ -1283,7 +1283,7 @@ function loadDocs(){
   }
   var h='';
   docs.forEach(function(d){
-    h+='<div class="doc" onclick="openDoc('+JSON.stringify(JSON.stringify(d.name))+')">'+
+    h+='<div class="doc" onclick="openDoc(\''+String(d.name).replace(/'/g,'')+'\')">'+
        '<span class="ic">📄</span><span class="grow"><span class="nm">'+esc(d.name)+'</span>'+
        '<div class="mt">'+fmtBytes(d.size)+' • '+new Date(d.date).toLocaleDateString('fa-IR')+'</div></span>'+
        '<span style="color:var(--muted)">›</span></div>';
