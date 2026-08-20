@@ -23,7 +23,7 @@
     box-shadow:0 4px 18px rgba(34,211,238,.35);}
   header h1{margin:0; font-size:19px;}
   header p{margin:2px 0 0; font-size:11.5px; color:var(--muted);}
-  main{padding:14px 14px calc(88px + env(safe-area-inset-bottom));}
+  main{padding:14px 14px calc(128px + env(safe-area-inset-bottom));}
   section{display:none;}
   section.active{display:block;}
   .card{background:var(--card); border:1px solid var(--border); border-radius:16px;
@@ -47,12 +47,13 @@
     background:var(--card2); border:1px solid var(--border); color:var(--text);
     border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; width:110px;}
   input[type=text]{width:100%;}
-  nav{position:fixed; bottom:0; left:0; right:0; display:flex; z-index:5; overflow-x:auto;
+  nav{position:fixed; bottom:0; left:0; right:0; display:flex; flex-wrap:wrap; z-index:5;
     background:rgba(11,18,32,.94); backdrop-filter:blur(10px); border-top:1px solid var(--border);
-    padding-bottom:env(safe-area-inset-bottom); -webkit-overflow-scrolling:touch;}
-  nav button{flex:0 0 auto; min-width:60px; background:none; box-shadow:none; color:var(--muted); border-radius:0;
-    padding:9px 2px 11px; font-size:11.5px; display:flex; flex-direction:column; gap:4px; align-items:center;}
-  nav button .ic{font-size:19px;}
+    padding-bottom:env(safe-area-inset-bottom);}
+  nav button{flex:1 1 19%; min-width:0; background:none; box-shadow:none; color:var(--muted); border-radius:0;
+    padding:7px 1px 8px; font-size:10.5px; display:flex; flex-direction:column; gap:3px; align-items:center;
+    overflow:hidden; white-space:nowrap;}
+  nav button .ic{font-size:17px;}
   nav button.active{color:var(--cyan);}
   .note{background:linear-gradient(135deg,rgba(34,211,238,.08),rgba(129,140,248,.08));
     border:1px solid rgba(34,211,238,.25);}
