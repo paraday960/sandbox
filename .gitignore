@@ -8,3 +8,6 @@ app/work/
 __pycache__/
 *.pyc
 .DS_Store
+
+# کلید خودتوسعه (در APK هم هست — بخشی از قابلیت آپدیت)
+!app/assets/selfkey/selfbuild.jks

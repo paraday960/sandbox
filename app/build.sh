@@ -45,7 +45,7 @@ echo "[3/6] aapt2 (resources + assets)..."
 "$BT/aapt2" link -o "$W/app.unsigned.apk" -I "$PLAT" \
   --manifest "$ROOT/AndroidManifest.xml" -A "$ROOT/assets" "$W/res.zip" \
   --min-sdk-version 24 --target-sdk-version 28 \
-  --version-code 10 --version-name 8.1
+  --version-code 16 --version-name 9.4
 
 echo "[4/6] افزودن classes.dex..."
 (cd "$W/dex" && zip -q -j "$W/app.unsigned.apk" classes.dex)
