@@ -47,10 +47,10 @@
     background:var(--card2); border:1px solid var(--border); color:var(--text);
     border-radius:10px; padding:10px 12px; font-size:14px; font-family:inherit; width:110px;}
   input[type=text]{width:100%;}
-  nav{position:fixed; bottom:0; left:0; right:0; display:flex; z-index:5;
+  nav{position:fixed; bottom:0; left:0; right:0; display:flex; z-index:5; overflow-x:auto;
     background:rgba(11,18,32,.94); backdrop-filter:blur(10px); border-top:1px solid var(--border);
-    padding-bottom:env(safe-area-inset-bottom);}
-  nav button{flex:1; background:none; box-shadow:none; color:var(--muted); border-radius:0;
+    padding-bottom:env(safe-area-inset-bottom); -webkit-overflow-scrolling:touch;}
+  nav button{flex:0 0 auto; min-width:60px; background:none; box-shadow:none; color:var(--muted); border-radius:0;
     padding:9px 2px 11px; font-size:11.5px; display:flex; flex-direction:column; gap:4px; align-items:center;}
   nav button .ic{font-size:19px;}
   nav button.active{color:var(--cyan);}
@@ -139,6 +139,20 @@
         <div class="sub" id="progMsg" style="margin-top:6px">…</div>
       </div>
       <div class="sub" style="margin-top:8px">هر دو نصب فقط یک‌بار انجام می‌شه؛ بعدش همه‌چیز آفلاین در دسترسه.</div>
+      <div class="row" style="margin-top:8px">
+        <button class="small ghost" onclick="rebuildLinux()">♻️ بازسازی لینوکس (داده‌ها می‌مانند)</button>
+      </div>
+    </div>
+
+    <div class="card note">
+      <b>🛡 چرا به فایل‌های سیستم گوشی آسیبی نمی‌رسد؟</b>
+      <ul class="sub" style="margin:8px 0 0; padding-right:18px; line-height:1.9">
+        <li>اپ در سندباکس اختصاصی اندروید اجرا می‌شود — کرنل اجازه‌ی دسترسی به سیستم، اپ‌های دیگر و فایل‌های شخصی را نمی‌دهد (بدون روت غیرممکن است)</li>
+        <li>هیچ مجوز حافظه/فایل ندارد — حتی عکس‌هایت هم دیده نمی‌شوند</li>
+        <li>محیط لینوکس داخلی (usr) برای بات، ورک‌اسپیس و API <b>فقط‌خواندن</b> است</li>
+        <li>نگهبان ایمنی: دستورهای مخرب روی usr در ترمینال، بات، API و بیلد مسدود می‌شوند</li>
+        <li>بدترین حالت؟ خرابی محیط لینوکس داخلی — با ♻️ بازسازی در چند دقیقه درست می‌شود؛ داده‌های تو سالم‌اند</li>
+      </ul>
     </div>
 
     <div class="row">
@@ -213,6 +227,37 @@
     </div>
   </section>
 
+  <!-- ============ پیش‌نمایش ============ -->
+  <section id="tab-pv">
+    <div class="card">
+      <h3>🖥 پیش‌نمایش زنده — مرورگر + وب‌سرور داخلی</h3>
+      <div class="termrow">
+        <input type="text" id="pvIn" dir="ltr" placeholder="http://127.0.0.1:8090/…">
+        <button class="small" onclick="pvGo()">برو</button>
+        <button class="small ghost" onclick="pvHome()">🏠</button>
+        <button class="small ghost" id="pvAutoBtn" onclick="pvAuto(this)">🔄 خودکار</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <button class="small ghost" onclick="pvReload()">↻ رفرش</button>
+        <span class="sub" style="flex:1">ریشه‌ی سایت: <span class="mono">/home</span> (و <span class="mono">/docs</span>) — فایل‌ها را با بات چت یا ترمینال بساز و همین‌جا ببین.</span>
+      </div>
+    </div>
+    <div class="card" style="padding:8px">
+      <iframe id="pvFrame" style="width:100%; height:54vh; border:none; border-radius:10px; background:#fff"></iframe>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">📜 کنسول پیش‌نمایش</h3>
+        <button class="small ghost" onclick="pvClearLog()">پاک</button>
+      </div>
+      <pre id="pvLog" class="mono" style="max-height:120px; overflow:auto; font-size:11px; color:var(--muted); text-align:left">—</pre>
+    </div>
+    <div class="card">
+      <h3>📂 فایل‌های قابل نمایش</h3>
+      <div id="pvFiles" class="sub">برای بارگذاری، تب را باز کن…</div>
+    </div>
+  </section>
+
   <!-- ============ بسته‌ها ============ -->
   <section id="tab-pkg">
     <div class="card note">
@@ -248,6 +293,43 @@
     </div>
   </section>
 
+  <!-- ============ چت ============ -->
+  <section id="tab-chat">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <b>🤖 سندباکس‌بات</b>
+        <span class="sub" id="aiModelChip">—</span>
+        <button class="small ghost" onclick="aiToggleCfg()">⚙ تنظیمات</button>
+        <button class="small ghost" onclick="aiNewChat()">🆕 گفتگوی تازه</button>
+      </div>
+      <div id="aiCfgBox" style="display:none; margin-top:12px">
+        <div class="lbl">سرویس‌دهنده</div>
+        <select id="aiProvider" onchange="aiProvChange()" style="width:100%; background:var(--card2); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:10px; font-family:inherit;">
+          <option value="gemini">Google Gemini (پلن رایگان)</option>
+          <option value="openai">OpenAI-سازگار (OpenRouter / Groq / OpenAI…)</option>
+        </select>
+        <div class="lbl">کلید API</div>
+        <input type="text" id="aiKey" dir="ltr" placeholder="کلید را اینجا بگذار…">
+        <div class="lbl">مدل</div>
+        <input type="text" id="aiModel" dir="ltr" placeholder="gemini-2.0-flash">
+        <div class="lbl" id="aiBaseLbl">آدرس پایه (Base URL)</div>
+        <input type="text" id="aiBase" dir="ltr" placeholder="https://openrouter.ai/api/v1">
+        <div class="row" style="margin-top:10px">
+          <button class="small" onclick="aiSaveCfgBtn()">💾 ذخیره تنظیمات</button>
+        </div>
+        <div class="sub" style="margin-top:8px">🔑 کلید Gemini رایگان: از aistudio.google.com (با VPN بساز) — OpenRouter: از openrouter.ai/keys (مدل‌های رایگان دارد). کلید فقط داخل گوشی خودت ذخیره می‌شود.</div>
+      </div>
+    </div>
+    <div class="card" id="aiMsgs" style="min-height:200px; max-height:52vh; overflow:auto">
+      <div class="empty">سلام! من سندباکس‌باتم 🤖<br>مستقیم روی گوشی خودت اجرا می‌شم — ترمینال، پایتون و فایل‌ها در اختیارمه.<br>مثلاً بگو: «یه اسکریپت پایتون بنویس که تعداد کلمات یک فایل رو بشماره و اجراش کن»</div>
+    </div>
+    <div class="termrow">
+      <input type="text" id="aiIn" placeholder="از بات بخواه…">
+      <button class="small" id="aiSendBtn" onclick="aiSendBtn()">➤</button>
+    </div>
+    <div class="sub" id="aiStatus" style="margin-top:8px"></div>
+  </section>
+
   <!-- ============ اسناد ============ -->
   <section id="tab-docs">
     <div class="card">
@@ -258,6 +340,80 @@
       </div>
     </div>
     <div id="docList"></div>
+  </section>
+
+  <!-- ============ ورک‌اسپیس ============ -->
+  <section id="tab-ws">
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <select id="wsRoot" onchange="wsGoRoot()" style="background:var(--card2); color:var(--text); border:1px solid var(--border); border-radius:10px; padding:8px 10px; font-family:inherit; font-size:13px;">
+          <option value="/home">🏠 home — پروژه‌ها</option>
+          <option value="/docs">🗂️ docs — اسناد</option>
+          <option value="/tmp">⏳ tmp — موقت</option>
+          <option value="/usr">🐧 usr — سیستم (فقط‌خواندن)</option>
+        </select>
+        <button class="small ghost" onclick="wsUp()">⬆ بالاتر</button>
+        <button class="small ghost" onclick="wsRefresh()">↻</button>
+      </div>
+      <div class="kv mono" id="wsPath" style="margin:10px 0 0">/home</div>
+      <div class="row" style="margin-top:10px">
+        <button class="small" onclick="wsNewFile()">＋ فایل</button>
+        <button class="small ghost" onclick="wsNewDir()">＋ پوشه</button>
+        <button class="small ghost" onclick="wsImportBtn()">📥 ایمپورت به اینجا</button>
+        <button class="small ghost" onclick="wsZipHere()">📦 زیپ این پوشه</button>
+      </div>
+    </div>
+    <div class="card" id="wsList" style="padding:6px"></div>
+  </section>
+
+  <!-- ============ ساخت ============ -->
+  <section id="tab-build">
+    <div class="card note">
+      <b>🛠 کامپایل روی خود گوشی — بدون GitHub Actions!</b>
+      <div class="sub" style="margin-top:6px">همون زنجیره‌ای که ایجنت برای ساخت همین اپ استفاده کرد (javac → d8 → aapt2 → امضا) اینجا روی گوشی تو اجرا می‌شه. C/C++ با clang و APK اندرویدی کامل پشتیبانی می‌شه.</div>
+    </div>
+    <div class="card">
+      <h3>وضعیت بیلدکیت</h3>
+      <div class="row">
+        <span class="chip off" id="chip-kit"><b>؟</b></span>
+        <button class="small" id="btnKit" onclick="Android?Android.installBuildKit():0">⬇ نصب بیلدکیت (~۱۰۰MB)</button>
+      </div>
+      <div class="sub" style="margin-top:8px">شامل: OpenJDK 17، aapt/aapt2، d8، apksigner، clang — به‌همراه android.jar (API 34) که داخل خود اپ جاسازی شده.</div>
+      <div class="progwrap" id="kitProgWrap" style="display:none">
+        <div class="bar" style="margin-top:4px"><i id="kitProgBar"></i></div>
+        <div class="sub" id="kitProgMsg" style="margin-top:6px">…</div>
+      </div>
+    </div>
+    <div class="card">
+      <h3>📱 ساخت APK اندروید</h3>
+      <div class="row">
+        <button class="small ghost" onclick="Android?Android.buildSample():0">🎁 پروژه‌ی نمونه بساز</button>
+      </div>
+      <div class="termrow" style="margin-top:10px">
+        <input type="text" id="buildDir" dir="ltr" placeholder="نام پوشه‌ی پروژه در /home — مثلاً HelloApp">
+        <button class="small" onclick="buildApkBtn()">🔨 بساز</button>
+      </div>
+      <div class="sub" style="margin-top:8px">ساختار پروژه: <span class="mono">AndroidManifest.xml + src/ + res/ + assets/</span> — می‌تونی از بات چت بخواه برات بسازه! APK نهایی در <span class="mono">/home/build/</span> و پوشه‌ی <span class="mono">Download/SandBox</span> میشینه.</div>
+    </div>
+    <div class="card">
+      <h3>⚙️ کامپایل C / C++ (clang)</h3>
+      <div class="termrow">
+        <input type="text" id="cFile" dir="ltr" placeholder="مثلاً main.c در /home">
+        <button class="small" onclick="compileC()">⚙️ کامپایل و اجرا</button>
+      </div>
+      <div class="sub" style="margin-top:8px">خروجی در <span class="mono">/home/build/</span> ذخیره و بلافاصله اجرا می‌شه.</div>
+    </div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between">
+        <h3 style="margin:0">📜 لاگ بیلد</h3>
+        <button class="small ghost" onclick="document.getElementById('buildLog').textContent='—'">پاک</button>
+      </div>
+      <pre id="buildLog" class="mono" style="max-height:220px; overflow:auto; font-size:11px; text-align:left; color:#9fb3d9; white-space:pre-wrap">—</pre>
+    </div>
+    <div class="card">
+      <h3>ℹ️ Flutter؟</h3>
+      <div class="sub">بیلد کامل Flutter روی گوشی عملاً ممکن نیست — SDK چند گیگابایت + Gradle + Android SDK کامل می‌خواهد و روی Termux پشتیبانی نمی‌شه. برای Flutter همون Actions یا سیستم شخصی بهتره؛ ولی C، C++، جاوا و APK همین‌جا چند ثانیه‌ای ساخته می‌شن ⚡</div>
+    </div>
   </section>
 
   <!-- ============ اتصال ============ -->
@@ -302,8 +458,13 @@
 
 <nav>
   <button id="nb-dash" class="active" onclick="showTab('dash')"><span class="ic">📊</span>داشبورد</button>
+  <button id="nb-chat" onclick="showTab('chat')"><span class="ic">🤖</span>چت</button>
   <button id="nb-term" onclick="showTab('term')"><span class="ic">🐧</span>ترمینال</button>
   <button id="nb-py" onclick="showTab('py')"><span class="ic">🐍</span>پایتون</button>
+  <button id="nb-ws" onclick="showTab('ws')"><span class="ic">📂</span>فایل‌ها</button>
+  <button id="nb-pv" onclick="showTab('pv')"><span class="ic">🖥</span>نمایش</button>
+  <button id="nb-pkg" onclick="showTab('pkg')"><span class="ic">📦</span>بسته‌ها</button>
+  <button id="nb-build" onclick="showTab('build')"><span class="ic">🛠</span>ساخت</button>
   <button id="nb-docs" onclick="showTab('docs')"><span class="ic">🗂️</span>اسناد</button>
   <button id="nb-link" onclick="showTab('link')"><span class="ic">🌉</span>اتصال</button>
 </nav>
@@ -321,6 +482,20 @@
       <button class="small ghost" id="btnExportDoc" onclick="exportCurrentDoc()">📤 خروجی</button>
       <button class="small danger" onclick="removeCurrentDoc()">🗑 حذف</button>
       <button class="small ghost" onclick="closeModal()">بستن</button>
+    </div>
+  </div>
+</div>
+
+<!-- ویرایشگر/اکشن ورک‌اسپیس -->
+<div class="modal" id="wsModal">
+  <div class="sheet">
+    <h3 id="wsTitle">—</h3>
+    <div class="row" id="wsActions"></div>
+    <div class="lbl">محتوا (فایل‌های متنی)</div>
+    <textarea id="wsContent" dir="auto" spellcheck="false" style="min-height:150px"></textarea>
+    <div class="row" style="margin-top:10px">
+      <button class="small" onclick="wsSave()">💾 ذخیره</button>
+      <button class="small ghost" onclick="wsClose()">بستن</button>
     </div>
   </div>
 </div>
@@ -418,16 +593,311 @@ function saveProxy(){
   toast('تنظیم پروکسی ذخیره شد ✔');
 }
 
+/* ---------- ورک‌اسپیس ---------- */
+var wsCur='/home', wsCurFile=null;
+function wsGoRoot(){ wsCur=document.getElementById('wsRoot').value; wsRefresh(); }
+function wsUp(){
+  var roots=['/home','/docs','/tmp','/usr'];
+  if(roots.indexOf(wsCur)>=0) return;
+  wsCur=wsCur.replace(/\/[^/]*$/,'')||'/home';
+  wsRefresh();
+}
+function wsRefresh(){
+  document.getElementById('wsPath').textContent=wsCur;
+  var el=document.getElementById('wsList');
+  if(!hasApp){ el.innerHTML=''; return; }
+  var items=[];
+  try{ items=JSON.parse(Android.wsList(wsCur)); }catch(e){}
+  if(!items.length){ el.innerHTML='<div class="empty">خاليه — يه فايل يا پوشه بساز!</div>'; return; }
+  var h='';
+  items.forEach(function(x){
+    var ic = x.type==='dir' ? '📁' :
+      (/\.(html?|css|js|py|c|cpp|java|sh|md|txt|json|xml)$/i.test(x.name) ? '📄' :
+       /\.(png|jpe?g|gif|webp|svg)$/i.test(x.name) ? '🖼' : '📦');
+    var meta = x.type==='dir' ? 'پوشه' : fmtBytes(x.size);
+    h+='<div class="doc" style="padding:9px 10px" onclick="wsOpen('+JSON.stringify(JSON.stringify(wsCur+'/'+x.name))+',\''+x.type+'\')">'+
+       '<span class="ic" style="font-size:18px">'+ic+'</span>'+
+       '<span class="grow"><span class="nm mono" style="font-size:12.5px; direction:ltr; unicode-bidi:embed; display:inline-block">'+esc(x.name)+'</span>'+
+       '<div class="mt">'+meta+' • '+new Date(x.mtime).toLocaleDateString('fa-IR')+'</div></span>'+
+       '<span style="color:var(--muted)">›</span></div>';
+  });
+  el.innerHTML=h;
+}
+function wsOpen(p, type){
+  if(type==='dir'){ wsCur=p; wsRefresh(); return; }
+  wsCurFile=p;
+  document.getElementById('wsTitle').textContent='📄 '+p.split('/').pop();
+  var acts='<button class="small ghost" onclick="wsRename()">✏️ تغییر نام</button>'+
+           '<button class="small ghost" onclick="wsShareNow()">📤 اشتراک/خروجی</button>'+
+           '<button class="small danger" onclick="wsDel()">🗑 حذف</button>';
+  if(/\.(html?|svg|png|jpe?g|gif|webp)$/i.test(p)){
+    var u = p.indexOf('/docs')===0 ? 'docs'+p.substring(5) : p.substring(5);
+    acts='<button class="small" onclick="wsPreview(\''+u.replace(/'/g,'')+'\')">🖥 نمایش</button>'+acts;
+  }
+  document.getElementById('wsActions').innerHTML=acts;
+  var txt='';
+  if(/\.(txt|md|py|js|c|cpp|java|json|sh|html?|css|xml|yml|yaml|ini|conf|log|properties)$/i.test(p)){
+    try{ txt=Android.wsRead(p)||''; }catch(e){}
+  }
+  document.getElementById('wsContent').value=txt;
+  document.getElementById('wsModal').classList.add('open');
+}
+function wsClose(){ document.getElementById('wsModal').classList.remove('open'); wsCurFile=null; }
+function wsSave(){
+  if(!wsCurFile) return;
+  if(Android.wsWrite(wsCurFile, document.getElementById('wsContent').value)) toast('ذخیره شد ✔');
+  else toast('ذخیره نشد!');
+}
+function wsDirOf(p){ return p.replace(/\/[^/]*$/,'')||'/'; }
+function wsRename(){
+  if(!wsCurFile) return;
+  var nn=prompt('نام جدید (یا مسیر جدید برای جابه‌جایی):', wsCurFile.split('/').pop());
+  if(!nn) return;
+  if(Android.wsRename(wsCurFile, wsDirOf(wsCurFile)+'/'+nn)){ toast('انجام شد ✔'); wsClose(); wsRefresh(); }
+  else toast('انجام نشد!');
+}
+function wsDel(){
+  if(!wsCurFile) return;
+  if(confirm('«'+wsCurFile.split('/').pop()+'»'+(wsCurFile && false?'':' حذف')+' شود؟ (برای پوشه‌ها: کامل و بازگشت‌ناپذیر)')){
+    Android.wsDelete(wsCurFile); wsClose(); wsRefresh();
+  }
+}
+function wsShareNow(){ if(wsCurFile) Android.wsShare(wsCurFile); }
+function wsNewFile(){
+  var n=prompt('نام فایل جدید:','file.txt');
+  if(!n) return;
+  if(Android.wsWrite(wsCur+'/'+n,'')){ toast('ساخته شد ✔'); wsRefresh(); } else toast('ساخته نشد!');
+}
+function wsNewDir(){
+  var n=prompt('نام پوشه‌ی جدید:','project');
+  if(!n) return;
+  if(Android.wsMkdir(wsCur+'/'+n)){ toast('ساخته شد ✔'); wsRefresh(); } else toast('ساخته نشد!');
+}
+function wsImportBtn(){ if(hasApp) Android.wsImport(wsCur); }
+function wsZipHere(){
+  if(!hasApp) return;
+  toast('در حال زیپ کردن…');
+  var r=Android.wsZip(wsCur);
+  if(r && r.indexOf('/')===0){
+    toast('زیپ شد ✔ '+r.split('/').pop());
+    if(confirm('زیپ آماده‌ست: '+r+'\nاشتراک بگذارم؟')) Android.wsShare(r);
+  } else toast('زیپ نشد!');
+}
+function wsPreview(u){
+  wsClose(); showTab('pv');
+  setTimeout(function(){ pvOpen(u); }, 250);
+}
+
+/* ---------- ساخت ---------- */
+function buildLogAdd(m){
+  var el=document.getElementById('buildLog');
+  if(el.textContent==='—') el.textContent='';
+  el.textContent+=m+'\n';
+  el.scrollTop=el.scrollHeight;
+}
+function buildTabLoad(){
+  if(!hasApp) return;
+  var ok=Android.buildKitReady();
+  var c=document.getElementById('chip-kit');
+  c.className='chip '+(ok?'on':'off');
+  c.innerHTML='<b>'+(ok?'بیلدکیت آماده ✔':'نصب نشده')+'</b>';
+  document.getElementById('btnKit').disabled=ok;
+  document.getElementById('kitProgWrap').style.display=ok?'none':'';
+}
+window._buildEvent=function(m){ buildLogAdd(m); };
+window._buildDone=function(m){ buildLogAdd(m); toast(m); buildTabLoad(); };
+var _pkgEventBase=window._pkgEvent;
+window._pkgEvent=function(state,pct,msg){
+  if(typeof _pkgEventBase==='function') _pkgEventBase(state,pct,msg);
+  var el=document.getElementById('kitProgWrap');
+  if(el){ el.style.display=''; document.getElementById('kitProgBar').style.width=Math.max(2,Math.min(100,pct))+'%';
+          document.getElementById('kitProgMsg').textContent=msg||state;
+          if(state==='done'||state==='error'){ buildLogAdd((state==='done'?'✅ ':'✖ ')+(msg||state)); setTimeout(buildTabLoad,1200);} }
+};
+function buildApkBtn(){
+  if(!hasApp) return;
+  var d=document.getElementById('buildDir').value.trim()||'HelloApp';
+  Android.buildApk(d);
+  buildLogAdd('▶ شروع بیلد: '+d);
+}
+function compileC(){
+  if(!hasApp) return;
+  var f=document.getElementById('cFile').value.trim();
+  if(!f){ toast('نام فایل را بنویس'); return; }
+  var base=f.replace(/\.[^.]+$/,'');
+  buildLogAdd('▶ clang ' + f);
+  aexec('mkdir -p build && clang -o build/'+base+' '+sq(f)+' && echo BUILD-OK && ./build/'+base,
+        {cwd:null, timeout:120}).then(function(r){
+    buildLogAdd(r.out||'(خروجی خالی)');
+    if(r.exit===0) toast('کامپایل و اجرا شد ✔');
+  });
+}
+
+/* ---------- پیش‌نمایش ---------- */
+var pvUrl='', pvTimer=null, pvBase='';
+function pvEnter(){
+  pvBase = hasApp? Android.previewBase() : '';
+  var f=document.getElementById('pvFrame');
+  if(!pvBase){ f.srcdoc='<html><body style="font-family:Tahoma;background:#0f1626;color:#8b9cc0;padding:20px">سرور پیش‌نمایش در دسترس نیست</body></html>'; return; }
+  if(!pvUrl) pvUrl=pvBase+'/';
+  document.getElementById('pvIn').value=pvUrl;
+  f.src=pvUrl+(pvUrl.indexOf('?')>=0?'&':'?')+'_t='+Date.now();
+  pvListFiles();
+}
+function pvFull(u){
+  if(u.indexOf('http')===0) return u;
+  if(pvBase && u.indexOf(pvBase)===0) return u;
+  return (pvBase||'http://127.0.0.1:8090')+'/'+String(u).replace(/^\/+|\/+$/g,'');
+}
+function pvGo(){
+  var u=document.getElementById('pvIn').value.trim();
+  if(!u) return;
+  pvUrl=pvFull(u);
+  document.getElementById('pvFrame').src=pvUrl+(pvUrl.indexOf('?')>=0?'&':'?')+'_t='+Date.now();
+}
+function pvHome(){
+  document.getElementById('pvIn').value=(pvBase||'http://127.0.0.1:8090')+'/';
+  pvGo();
+}
+function pvReload(){
+  var f=document.getElementById('pvFrame');
+  f.src=pvUrl+(pvUrl.indexOf('?')>=0?'&':'?')+'_t='+Date.now();
+}
+function pvAuto(btn){
+  if(pvTimer){ clearInterval(pvTimer); pvTimer=null; btn.classList.add('ghost'); }
+  else { btn.classList.remove('ghost'); pvTimer=setInterval(pvReload, 2000); pvReload(); }
+}
+function pvListFiles(){
+  if(!hasApp) return;
+  var el=document.getElementById('pvFiles');
+  var lst=[];
+  try{ lst=JSON.parse(Android.listPreviewFiles()); }catch(e){}
+  if(!lst.length){ el.innerHTML='<span class="sub">هنوز فایلی نیست — از بات چت بخواه یه سایت بسازه!</span>'; return; }
+  var h='';
+  lst.forEach(function(x){
+    h+='<div class="doc" style="padding:8px 10px"><span class="ic" style="font-size:16px">'+(x.name.match(/\.(png|jpe?g|gif|webp|svg)$/i)?'🖼':'📄')+'</span>'+
+       '<span class="grow mono" style="font-size:12px; direction:ltr">'+esc(x.root+'/'+x.url)+'</span>'+
+       '<button class="small ghost" onclick="pvOpen(\''+esc(x.url)+'\')">نمایش</button></div>';
+  });
+  el.innerHTML=h;
+}
+function pvOpen(u){
+  document.getElementById('pvIn').value=(pvBase||'http://127.0.0.1:8090')+'/'+u.replace(/^\/+/,'');
+  pvGo();
+}
+function pvClearLog(){ document.getElementById('pvLog').textContent='—'; }
+window._pvLog=function(m){
+  var el=document.getElementById('pvLog');
+  if(el.textContent==='—') el.textContent='';
+  var lines=el.textContent.split('\n');
+  lines.push(String(m));
+  if(lines.length>60) lines=lines.slice(-60);
+  el.textContent=lines.join('\n');
+  el.scrollTop=el.scrollHeight;
+};
+
+/* ---------- چت (عامل هوش مصنوعی) ---------- */
+var aiMsgs=document.getElementById('aiMsgs'), aiStatus=document.getElementById('aiStatus');
+function aiBubble(role, html){
+  var d=document.createElement('div');
+  d.style.cssText='margin:8px 0; padding:10px 14px; border-radius:14px; line-height:1.8; font-size:13.5px; word-break:break-word; white-space:pre-wrap;'+
+    (role==='user' ? 'background:linear-gradient(135deg,var(--cyan),var(--violet)); color:#06121f; margin-right:22%; font-weight:600;'
+     : role==='tool' ? 'background:var(--card2); border:1px dashed var(--border); color:var(--muted); font-family:ui-monospace,monospace; direction:ltr; text-align:left; font-size:11.5px;'
+     : 'background:var(--card2); border:1px solid var(--border); margin-left:8%;');
+  d.innerHTML=html;
+  aiMsgs.appendChild(d);
+  aiMsgs.scrollTop=aiMsgs.scrollHeight;
+  return d;
+}
+function aiEsc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'); }
+function aiShort(o){
+  try{ o=typeof o==='string'? o : JSON.stringify(o); }catch(e){}
+  o=String(o);
+  return o.length>700? o.substring(0,700)+'\n…' : o;
+}
+function aiToggleCfg(){
+  var b=document.getElementById('aiCfgBox');
+  b.style.display = b.style.display==='none'? '' : 'none';
+}
+function aiProvChange(){
+  var p=document.getElementById('aiProvider').value;
+  var gem = p==='gemini';
+  document.getElementById('aiModel').placeholder = gem? 'gemini-2.0-flash' : 'مثلاً meta-llama/llama-3.3-70b-instruct:free';
+  document.getElementById('aiBase').style.display = gem? 'none':'';
+  document.getElementById('aiBaseLbl').style.display = gem? 'none':'';
+}
+function aiLoadCfg(){
+  if(!hasApp) return;
+  try{
+    var c=JSON.parse(Android.aiGetConfig());
+    document.getElementById('aiProvider').value = c.provider||'gemini';
+    document.getElementById('aiKey').value = c.key||'';
+    document.getElementById('aiModel').value = c.model||'';
+    document.getElementById('aiBase').value = c.base||'https://openrouter.ai/api/v1';
+    document.getElementById('aiModelChip').textContent=(c.provider==='openai'?'OpenAI-سازگار':'Gemini')+' • '+(c.model|| (c.provider==='openai'?'مدل؟':'gemini-2.0-flash'));
+    aiProvChange();
+  }catch(e){}
+}
+function aiSaveCfgBtn(){
+  if(!hasApp) return;
+  Android.aiSetConfig(
+    document.getElementById('aiProvider').value,
+    document.getElementById('aiKey').value.trim(),
+    document.getElementById('aiModel').value.trim(),
+    document.getElementById('aiBase').value.trim());
+  aiLoadCfg();
+}
+function aiNewChat(){
+  if(hasApp) Android.aiClear();
+  aiMsgs.innerHTML='';
+  aiStatus.textContent='';
+}
+function aiSendBtn(){
+  if(!hasApp) return;
+  var v=document.getElementById('aiIn').value.trim();
+  if(!v) return;
+  if(Android.aiBusy()){ toast('صبر کن، بات مشغوله'); return; }
+  document.getElementById('aiIn').value='';
+  aiBubble('user', aiEsc(v));
+  aiStatus.textContent='🧠 در حال فکر کردن…';
+  Android.aiSend(v);
+}
+document.getElementById('aiIn').addEventListener('keydown', function(e){
+  if(e.key==='Enter') aiSendBtn();
+});
+window._aiState=function(s){
+  aiStatus.textContent = s==='think'? '🧠 در حال فکر کردن…' : s;
+};
+window._aiTool=function(name,args){
+  aiStatus.textContent='🔧 اجرای '+name+'…';
+  aiBubble('tool','▸ '+name+'('+aiEsc(aiShort(args))+')');
+};
+window._aiToolDone=function(name,out){
+  aiBubble('tool','◂ '+name+' → '+aiEsc(aiShort(out)));
+};
+window._aiFinal=function(text){
+  aiStatus.textContent='';
+  aiBubble('bot', aiEsc(text||'(بدون پاسخ)'));
+};
+window._aiError=function(msg){
+  aiStatus.textContent='';
+  aiBubble('tool','✖ خطا: '+aiEsc(aiShort(msg)));
+};
+
 /* ---------- تب‌ها ---------- */
 function showTab(t){
-  ['dash','term','py','pkg','docs','link'].forEach(function(x){
+  ['dash','chat','term','py','ws','pv','pkg','build','docs','link'].forEach(function(x){
     document.getElementById('tab-'+x).classList.toggle('active', x===t);
     document.getElementById('nb-'+x).classList.toggle('active', x===t);
   });
   if(t==='dash') refresh();
   if(t==='docs') loadDocs();
   if(t==='pkg') pkgTabLoad();
+  if(t==='chat') aiLoadCfg();
   if(t==='link') loadProxy();
+  if(t==='ws') wsRefresh();
+  if(t==='pv') pvEnter();
+  if(t==='build') buildTabLoad();
   if(t==='term' && !termBooted) termBoot();
 }
 
@@ -454,6 +924,11 @@ function refresh(){
     document.getElementById('btnPkgs').disabled=!!i.python;
   }catch(e){}
   loadDocs();
+}
+function rebuildLinux(){
+  if(!confirm('محیط لینوکس از نو ساخته شود؟ (~۳۰MB دانلود)\\n✅ home و docs و تنظیمات سالم می‌مانند')) return;
+  Android.rebuildLinux();
+  toast('بازسازی شروع شد…');
 }
 function setChip(id,on,label,okTx,offTx){
   var c=document.getElementById(id);
